@@ -1,0 +1,60 @@
+/* Purple/Cyan Gradient Cards */
+.gradient-card-purple {
+    background: linear-gradient(135deg, #bf00ff 0%, #ff0099 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(191, 0, 255, 0.3);
+    transition: transform 0.2s;
+}
+
+.gradient-card-purple:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(191, 0, 255, 0.4);
+}
+
+.gradient-card-cyan {
+    background: linear-gradient(135deg, #00f2ff 0%, #0099ff 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(0, 242, 255, 0.3);
+    transition: transform 0.2s;
+}
+
+.gradient-card-cyan:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 242, 255, 0.4);
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #bf00ff, #00f2ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
