@@ -1,47 +1,31 @@
-# SME Cyber Exposure Dashboard - Integrated Documentation
+# PentesterFlow - AI-Driven DAST Platform
+
+![PentesterFlow Dashboard](https://via.placeholder.com/1200x600?text=PentesterFlow+Dashboard)
 
 ## 🌟 Overview
-The SME Cyber Exposure Dashboard is a comprehensive, production-ready security platform designed to protect small and medium enterprises. It combines raw network intelligence (Nmap), artificial intelligence (Gemini), and human-centric design to transform technical data into an audit-ready security posture.
+**PentesterFlow** is an agentic dynamic application security testing (DAST) platform that uses AI to intelligently discover, test, and validate web application vulnerabilities. Unlike traditional scanners, PentesterFlow uses contextual reasoning to find complex business logic flaws (BOLA, IDOR) and validates findings with LLMs to minimize false positives.
 
-This document covers **all features**, including original core functionality and the enhancements from Phase 1, 2, and 3.
+It combines the speed of automated scanners (Nuclei, Nmap) with the reasoning capabilities of Large Language Models (Gemini/GPT-4) to serve as an autonomous junior pentester for your team.
 
 ---
 
-## 🚀 Combined Feature List
+## 🚀 Key Features
 
-### 1. Unified Dashboard & Overview
-*   **Security Health Score**: A persistent 0-100 score and A-F letter grade representing overall network risk.
-*   **The Action Center**: A central "To-Do" list that translates technical vulnerabilities into simple, plain-English security tasks.
-*   **Quick Stats**: Real-time counters for Active Assets, Critical Vulnerabilities, and Last Scan Status.
-*   **Cyber-Neon UI**: A high-contrast, professional aesthetic designed for modern Security Operation Centers (SOC).
+### 1. Autonomous AI Agents
+- **Recon Agent**: Crawls modern SPAs using Playwright to discover hidden endpoints and map application logic.
+- **Attack Agent**: Context-aware payload generation that tests for SQLi, XSS, BOLA, and more based on the specific endpoint structure.
+- **Validation Agent**: Uses LLM reasoning to analyze responses and filter out false positives with >90% accuracy.
+- **Reporting Agent**: Generates executive summaries, technical details, and Proof of Concept (PoC) scripts automatically.
 
-### 2. Intelligent Scanning & Discovery
-*   **Deep Nmap Integration**:
-    *   **Quick Scan**: Fast discovery of active hosts and ports.
-    *   **Full Scan**: In-depth OS fingerprinting and service detection.
-*   **Subnet/CIDR Support**: Scan individual IPs (`192.168.1.10`) or entire office networks (`192.168.1.0/24`).
-*   **Scan History**: Complete archive of every scan performed, including results and generated actions.
+### 2. Modern DAST Capabilities
+- **Business Logic Testing**: Detects authorization flaws like BOLA/IDOR by understanding user context.
+- **Real-Time Log Console**: Watch the AI agents "think" and execute steps in real-time.
+- **PoC Generation**: Get copy-paste Python scripts to reproduce and verify every finding.
 
-### 3. Active Monitoring & Asset Management
-*   **Persistent Network Inventory**: Every device discovered is tracked in a historical database with `First Seen` and `Last Seen` timestamps.
-*   **Change Detection Alerts**:
-    *   **New Device Detection**: Automatic **HIGH priority** alert when an unauthorized or unknown device joins the network.
-    *   **Port Change Detection**: Alerts when a known device opens new or unexpected services.
-*   **Live Activity Feed**: A real-time timeline (Twitter-style) of security events, alerts, and system activities.
-*   **Offline Tracking**: Automatically identifies and tracks devices that have gone offline.
-
-### 4. Vulnerability & Risk Management
-*   **Automated Risk Calculation**: Proprietary engine that deducts points for open high-risk ports (Telnet, RDP, SMB) and detected vulnerabilities.
-*   **Network Topology Map**: Visual graph of your network showing how devices are interconnected.
-*   **Service Analysis**: Identifies exact software versions and products running on every port.
-
-### 5. AI Advisor & Reporting
-*   **AI Security Advisor (Gemini)**: Leverages Large Language Models to write custom, context-aware executive summaries and remediation strategies.
-*   **Professional PDF Export**: Generate audit-ready documents with one click, containing:
-    *   Executive Summaries (Management-ready)
-    *   Key Security Metrics
-    *   Prioritized Action Item Tables
-*   **Audit-Ready Logs**: Perfect for cyber insurance applications, compliance audits, and management reviews.
+### 3. Enterprise Dashboard
+- **Target Management**: Organize assets and track security posture over time.
+- **Vulnerability Laboratory**: Interactive view to analyze, verify, and manage vulnerability findings.
+- **Network Intelligence**: (Legacy) Deep network scanning and asset inventory tracking.
 
 ---
 
@@ -49,26 +33,12 @@ This document covers **all features**, including original core functionality and
 
 | Component | Technology | Role |
 | :--- | :--- | :--- |
-| **Backend** | Python / FastAPI | High-speed API and core logic |
-| **Frontend** | React / Vite | Modern, responsive user interface |
-| **Scanner** | Nmap | Network service & vulnerability discovery |
-| **AI** | Google Gemini | Threat analysis & report writing |
-| **Database** | PostgreSQL | Historical scan & asset storage |
-| **Async Tasks** | Celery & Redis | Background scanning & monitoring |
-| **Reporting** | ReportLab | Professional PDF generation |
-| **Styling**| Tailwind CSS | Premium dashboard aesthetics |
-
----
-
-## 📁 Architecture Overview
-
-1.  **Scanner Layer**: Nmap probes the target network and returns raw service data.
-2.  **Processing Layer**: 
-    *   `RiskCalculator` grades the results.
-    *   `ActionGenerator` converts ports/vulns into tasks.
-    *   `AssetMonitor` compares results against the historical inventory to find changes.
-3.  **Intelligence Layer**: Gemini AI summarizes findings into human-readable advice.
-4.  **Presentation Layer**: React dashboard visualizes the data, and PDF Generator creates downloadable reports.
+| **Orchestration** | Python / LangGraph-style | Multi-agent coordination and state management |
+| **Backend** | FastAPI | High-performance Async API |
+| **Frontend** | React / Vite | Real-time interactive dashboard |
+| **Scanning** | Playwright & Nuclei | Browser automation and vulnerability scanning |
+| **AI/LLM** | Gemini Pro / GPT-4 | Reasoning, validation, and reporting |
+| **Database** | PostgreSQL | Relational data storage |
 
 ---
 
@@ -76,28 +46,47 @@ This document covers **all features**, including original core functionality and
 
 ### Prerequisites
 *   Docker & Docker Compose
-*   (Recommended) Gemini API Key added to `.env`
+*   Gemini API Key (or OpenAI Key)
 
 ### Quick Start
 ```bash
-# 1. Start the full stack
-docker-compose up -d --build
+# 1. Clone the repository
+git clone https://github.com/your-org/pentesterflow.git
 
-# 2. Access the Dashboard
+# 2. Add your API Key
+# Create a .env file and add: GEMINI_API_KEY=your_key_here
+
+# 3. Start the platform
+docker-compose up --build
+
+# 4. Access the Dashboard
 http://localhost:5173
-
-# 3. Access API Docs
-http://localhost:8000/docs
 ```
 
 ---
 
-## � Roadmap (Future Features)
-- [ ] **Automated Remediation**: One-click scripts to close ports or update firewalls.
-- [ ] **External Threat Intel**: Integration with Shodan/Censys for external-facing risk.
-- [ ] **User Role Management**: Admin vs. Viewer permissions.
-- [ ] **Compliance Templates**: Pre-configured checklists for GDPR, NIST, or ISO 27001.
+## 🔮 Roadmap & Future Plans
+
+### Phase 1: Enhanced AI & Customization (Immediate)
+- [ ] **Custom Training**: Fine-tune models on internal vulnerability reports.
+- [ ] **Autonomous Exploitation**: Safe, automated verification of complex exploit chains (e.g., XSS to ATO).
+- [ ] **Visual Reconnaissance**: Computer vision analysis for visual vulnerabilities.
+
+### Phase 2: Collaboration (Mid-Term)
+- [ ] **Multi-User RBAC**: Enhanced permissions for teams (Admin, Pentester, Viewer).
+- [ ] **Real-time Collaboration**: Shared workspaces for joint pentesting sessions.
+- [ ] **Ticket Integration**: Two-way sync with Jira/Linear.
+
+### Phase 3: Advanced Ecosystem (Long-Term)
+- [ ] **Cloud Posture (CSPM)**: Integration with AWS/Azure/GCP scanning.
+- [ ] **API Deep Dive**: Specialized agents for GraphQL and gRPC testing.
+- [ ] **Compliance Auto-Mapping**: Map findings directly to SOC2, PCI-DSS, and ISO 27001 controls.
 
 ---
 
-Designed for SMEs. Verified for Security. Done for You.
+## 📄 Documentation
+Full documentation is available in the `/docs` directory or via the "Reports" tab in the dashboard.
+
+---
+
+**PentesterFlow** — *The Future of AI-Native Security Testing.*
