@@ -11,11 +11,11 @@ from datetime import datetime
 router = APIRouter()
 
 class ReportResponse(BaseModel):
-    scan_id: int
+    scan_id: str
     ai_analysis: str
 
 @router.get("/{scan_id}", response_model=ReportResponse)
-async def get_report(scan_id: int, db: Session = Depends(get_db)):
+async def get_report(scan_id: str, db: Session = Depends(get_db)):
     scan = db.query(Scan).filter(Scan.id == scan_id).first()
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
@@ -31,7 +31,7 @@ async def get_report(scan_id: int, db: Session = Depends(get_db)):
     return ReportResponse(scan_id=scan.id, ai_analysis=analysis)
 
 @router.get("/{scan_id}/pdf")
-def download_pdf_report(scan_id: int, db: Session = Depends(get_db)):
+def download_pdf_report(scan_id: str, db: Session = Depends(get_db)):
     """
     Generate and download a professional PDF security report.
     """
@@ -39,10 +39,17 @@ def download_pdf_report(scan_id: int, db: Session = Depends(get_db)):
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
     
+    # Resolve target URL safely
+    target_name = "unknown_target"
+    if scan.target and scan.target.base_url:
+        target_name = scan.target.base_url
+    elif scan.target_url:
+        target_name = scan.target_url
+
     # Prepare scan data for PDF
     scan_data = {
         "scan_id": scan.id,
-        "target": scan.target,
+        "target": target_name,
         "completed_at": scan.completed_at,
         "risk_score": scan.risk_score,
         "assets": [
@@ -77,7 +84,8 @@ def download_pdf_report(scan_id: int, db: Session = Depends(get_db)):
     pdf_buffer = PDFReportGenerator.generate_report(scan_data)
     
     # Return as downloadable file
-    filename = f"security_report_{scan.target.replace('/', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf"
+    safe_filename = target_name.replace('https://', '').replace('http://', '').replace('/', '_').replace(':', '')
+    filename = f"security_report_{safe_filename}_{datetime.now().strftime('%Y%m%d')}.pdf"
     return StreamingResponse(
         pdf_buffer,
         media_type="application/pdf",

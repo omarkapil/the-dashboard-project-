@@ -43,6 +43,9 @@ export const targetService = {
     // Update target
     update: (id, data) => api.patch(`/targets/${id}`, data),
 
+    // Discovery
+    discover: (domain) => api.post('/targets/discover', null, { params: { domain } }),
+
     // Delete target
     delete: (id) => api.delete(`/targets/${id}`),
 };
@@ -81,6 +84,11 @@ export const vulnerabilityService = {
 
     // Update vulnerability status
     update: (id, data) => api.patch(`/vulnerabilities/${id}`, data),
+
+    // Update Workflow (Ticket, Assignee, Status)
+    updateWorkflow: (id, { ticket_id, assigned_to, status }) => api.patch(`/vulnerabilities/${id}/workflow`, null, {
+        params: { ticket_id, assigned_to, status }
+    }),
 
     // Get proof of concept
     getPoc: (id) => api.get(`/vulnerabilities/${id}/poc`),

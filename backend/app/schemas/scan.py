@@ -78,9 +78,13 @@ class ScanSummary(BaseModel):
     id: str
     status: ScanStatus
     scan_type: str
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    target_url: Optional[str] = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
     risk_score: float = 0.0
+    target_display: Optional[str] = "Unknown"
+    vulnerabilities_count: Optional[int] = 0
+    assets_count: Optional[int] = 0
 
     class Config:
         from_attributes = True

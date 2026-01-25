@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # === 1. The Gateway (The Unified Target) ===
+  # This makes it look like one server with multiple open ports
+  lab_gateway:
+    image: nginx:latest
+    container_name: lab_gateway
+    volumes:
+      - ./lab_config/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      # We expose these to the host for manual verification,
+      # but scanner will use the container name internally.
+      - "8080:80" # Map internal 80 to host 8080 (Gateway Web)
+      - "3000:3000" # Map internal 3000 to host 3000 (Juice Shop)
+      - "6380:6379" # Map internal 6379 to host 6380 (Redis)
+    depends_on:
+      - juice-shop
+      - vulnerable-redis
+      - vulnerable-nginx
+    networks:
+      - lab_network
+
+  # === 2. Hidden Vulnerable Services ===
+  # Note: No 'ports' section for these creates isolation.
+  # They are only accessible inside the docker network.
+
+  juice-shop:
+    image: bkimminich/juice-shop
+    container_name: lab_target_web
+    restart: unless-stopped
+    networks:
+      - lab_network
+
+  vulnerable-redis:
+    image: redis:3.2-alpine
+    container_name: lab_target_redis
+    command: redis-server --protected-mode no
+    networks:
+      - lab_network
+
+  vulnerable-nginx:
+    # Use alpine for smaller download size
+    image: nginx:1.10-alpine
+    container_name: lab_target_nginx
+    networks:
+      - lab_network
+
+networks:
+  lab_network:
+    name: the-dashboard-project-_default
+    external: true

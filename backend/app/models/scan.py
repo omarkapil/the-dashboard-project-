@@ -50,11 +50,16 @@ class Target(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
     base_url = Column(Text, nullable=False)
+    source = Column(String(50), default="manual")  # manual, discovery, aws
     tech_stack = Column(JSON, nullable=True)  # Detected technologies
     auth_method = Column(String(50), nullable=True)  # none, basic, jwt, cookie
     auth_credentials = Column(JSON, nullable=True)  # Encrypted in production
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Business Context
+    asset_value = Column(Enum("CRITICAL", "HIGH", "MEDIUM", "LOW", name="asset_value_enum"), default="MEDIUM")
+    data_sensitivity = Column(Enum("PII", "FINANCIAL", "NONE", name="data_sensitivity_enum"), default="NONE")
 
     # Relationships
     scans = relationship("Scan", back_populates="target", cascade="all, delete-orphan")
@@ -100,6 +105,22 @@ class Scan(Base):
     assets = relationship("ScanAsset", back_populates="scan", cascade="all, delete-orphan")
     actions = relationship("ActionItem", back_populates="scan", cascade="all, delete-orphan")
 
+    @property
+    def vulnerabilities_count(self):
+        return len(self.vulnerabilities)
+
+    @property
+    def assets_count(self):
+        return len(self.assets)
+
+    @property
+    def target_display(self):
+        if self.target_url:
+            return self.target_url
+        if self.target:
+            return self.target.base_url
+        return "Unknown"
+
 
 # ============================================================================
 # VULNERABILITIES
@@ -127,9 +148,11 @@ class Vulnerability(Base):
     confidence_score = Column(Float, nullable=True)  # 0-1 confidence
     ai_validation_result = Column(JSON, nullable=True)  # LLM analysis
     
-    # Remediation
+    # Remediation & Workflow
     proof_of_concept = Column(Text, nullable=True)
     remediation = Column(Text, nullable=True)
+    ticket_id = Column(String(100), nullable=True) # Jira/Linear ID
+    assigned_to = Column(String(100), nullable=True) # User email or ID
     
     # Legacy fields for backward compat
     host = Column(String, nullable=True)

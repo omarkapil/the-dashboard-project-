@@ -1,7 +1,7 @@
 from app.core.celery_app import celery_app
 from app.services.nmap_wrapper import NmapWrapper
 from app.core.database import SessionLocal
-from app.models.scan import Scan, Vulnerability, ScanStatus, ScanAsset, ActionItem
+from app.models.scan import Scan, Vulnerability, ScanStatus, ScanAsset, ActionItem, Target
 from app.services.risk_engine import RiskCalculator, ActionGenerator
 from app.services.asset_monitor import AssetMonitor
 from datetime import datetime
@@ -19,13 +19,28 @@ def run_scan_task(self, scan_id: int):
         return
 
     try:
-        # Update status to RUNNING
+        # Update status to RUNNING and set actual start time
         scan.status = ScanStatus.RUNNING
+        scan.started_at = datetime.utcnow()
         db.commit()
         
         # Execute Scan
         scanner = NmapWrapper()
-        results = scanner.scan_target(scan.target, scan.scan_type)
+        
+        # Determine target URL
+        target_host = scan.target_url # Legacy fallback
+        if scan.target and scan.target.base_url:
+            target_host = scan.target.base_url
+            
+        if not target_host:
+            raise ValueError(f"No valid target URL found for scan {scan.id}")
+        
+        # SANITIZE TARGET FOR NMAP (Strip protocol, path, port)
+        from urllib.parse import urlparse
+        parsed = urlparse(target_host)
+        clean_target = parsed.hostname or parsed.path.split('/')[0] # Handles 'localhost:3000' or 'http://localhost'
+            
+        results = scanner.scan_target(clean_target, scan.scan_type)
         
         # Save Results
         total_risk = 0.0
@@ -58,6 +73,7 @@ def run_scan_task(self, scan_id: int):
                     protocol=port_data['protocol'],
                     service=port_data['service'],
                     severity=port_data['severity'],
+                    url=f"{port_data['protocol']}://{host_data['ip']}:{port_data['port']}",
                     description=f"Service: {port_data['product']} {port_data['version']}",
                     remediation="Update service or firewall port." # Placeholder
                 )
@@ -80,7 +96,16 @@ def run_scan_task(self, scan_id: int):
         }
 
         # Calculate Professional Risk Score
-        scan.risk_score = RiskCalculator.calculate(scan_data)
+        # Fetch Target to get Business Context
+        target_obj = db.query(Target).filter(Target.id == scan.target_id).first()
+        criticality_multiplier = 1.0
+        if target_obj:
+            if target_obj.asset_value == "CRITICAL": criticality_multiplier = 2.0
+            elif target_obj.asset_value == "HIGH": criticality_multiplier = 1.5
+            elif target_obj.asset_value == "LOW": criticality_multiplier = 0.5
+            
+        base_score = RiskCalculator.calculate(scan_data)
+        scan.risk_score = min(100.0, base_score * criticality_multiplier)
         
         # Generate Action Items
         actions = ActionGenerator.generate_actions(scan_data)

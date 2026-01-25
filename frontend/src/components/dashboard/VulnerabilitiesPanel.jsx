@@ -171,33 +171,41 @@ const VulnerabilitiesPanel = ({ scanId = null, refresh = 0 }) => {
                                 )}
                             </div>
 
-                            {/* Actions */}
-                            <div className="flex gap-2">
+                            {/* Actions & Workflow */}
+                            <div className="flex flex-col gap-2 border-l border-gray-700 pl-4 ml-4 min-w-[150px]">
+                                <select
+                                    value={vuln.status}
+                                    onChange={(e) => {
+                                        vulnerabilityService.updateWorkflow(vuln.id, { status: e.target.value });
+                                        fetchVulnerabilities();
+                                    }}
+                                    className={`text-xs px-2 py-1 rounded bg-gray-800 border border-gray-600 text-white w-full`}
+                                >
+                                    <option value="open">Open</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="fixed">Fixed</option>
+                                    <option value="false_positive">False Positive</option>
+                                </select>
+
+                                <input
+                                    type="text"
+                                    placeholder="Ticket ID"
+                                    defaultValue={vuln.ticket_id}
+                                    onBlur={(e) => {
+                                        if (e.target.value !== vuln.ticket_id) {
+                                            vulnerabilityService.updateWorkflow(vuln.id, { ticket_id: e.target.value });
+                                        }
+                                    }}
+                                    className="text-xs px-2 py-1 rounded bg-gray-800 border border-gray-600 text-white w-full"
+                                />
+
                                 <button
                                     onClick={() => handleViewPoc(vuln)}
-                                    className="p-2 text-gray-400 hover:text-cyan-400 hover:bg-gray-800 rounded-lg transition-colors"
-                                    title="View PoC"
+                                    className="flex items-center gap-2 justify-center p-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded text-cyan-400"
                                 >
-                                    <Code className="h-4 w-4" />
+                                    <Code className="h-3 w-3" />
+                                    View PoC
                                 </button>
-                                {vuln.status === 'open' && (
-                                    <>
-                                        <button
-                                            onClick={() => handleMarkFixed(vuln.id)}
-                                            className="p-2 text-gray-400 hover:text-green-400 hover:bg-gray-800 rounded-lg transition-colors"
-                                            title="Mark as Fixed"
-                                        >
-                                            <CheckCircle className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleMarkFalsePositive(vuln.id)}
-                                            className="p-2 text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded-lg transition-colors"
-                                            title="Mark as False Positive"
-                                        >
-                                            <XCircle className="h-4 w-4" />
-                                        </button>
-                                    </>
-                                )}
                             </div>
                         </div>
                     </div>

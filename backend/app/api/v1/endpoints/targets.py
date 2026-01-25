@@ -93,3 +93,14 @@ def delete_target(target_id: str, db: Session = Depends(get_db)):
     db.commit()
     
     return {"message": "Target deleted", "target_id": target_id}
+
+
+@router.post("/discover")
+async def discover_targets(domain: str, db: Session = Depends(get_db)):
+    """
+    Trigger Asset Discovery (Subdomain Enumeration) for a domain.
+    """
+    from app.services.discovery_agent import DiscoveryAgent
+    agent = DiscoveryAgent(db)
+    result = await agent.process_discovery(domain)
+    return result

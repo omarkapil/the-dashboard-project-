@@ -9,7 +9,10 @@ class AIAdvisor:
     def __init__(self):
         if settings.GEMINI_API_KEY:
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-pro')
+            try:
+                self.model = genai.GenerativeModel('gemini-1.5-flash')
+            except Exception:
+                self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
         else:
             logger.warning("GEMINI_API_KEY not set. Using AI Advisor Demo Mode.")
             self.model = None

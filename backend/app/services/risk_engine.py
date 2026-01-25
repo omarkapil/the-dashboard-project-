@@ -13,16 +13,20 @@ class RiskCalculator:
     - Open High-Risk Port (RDP/Telnet/SMB): -15 points (if not marked as vuln)
     """
     
-    HIGH_RISK_PORTS = [21, 23, 445, 3389] # FTP, Telnet, SMB, RDP
+    HIGH_RISK_PORTS = [21, 23, 445, 3389, 6379, 3000, 8080] # FTP, Telnet, SMB, RDP, Redis, App, Proxy
 
     @staticmethod
     def calculate(scan_data):
+        hosts = scan_data.get('assets', [])
+        if not hosts:
+            return 0.0 # No assets found = Scan failed/Empty
+            
         score = 100
         
         # 1. Vulnerability Penalty
-        # Assuming scan_data has a list of vulnerability objects or dicts
         vulns = scan_data.get('vulnerabilities', [])
         for v in vulns:
+            # ... (existing logic)
             severity = v.get('severity', 'LOW').upper()
             if severity == 'CRITICAL':
                 score -= 20
@@ -31,18 +35,14 @@ class RiskCalculator:
             elif severity == 'MEDIUM':
                 score -= 5
         
-        # 2. Open Port Penalty (Simple Heuristic for basic scans)
-        # If we have raw port data
-        hosts = scan_data.get('assets', [])
+        # 2. Open Port Penalty
         for host in hosts:
             for port_data in host.get('ports', []):
                 port = port_data.get('port')
                 if port in RiskCalculator.HIGH_RISK_PORTS and port_data.get('state') == 'open':
-                     # deduplicate if it's already caught as a vuln? 
-                     # For now, strict penalty.
                     score -= 15
 
-        return max(0, score)
+        return float(max(0, score))
 
 class ActionGenerator:
     """

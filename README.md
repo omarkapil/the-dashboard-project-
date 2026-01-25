@@ -1,91 +1,82 @@
 # PentesterFlow - AI-Driven DAST Platform
 
-![PentesterFlow Dashboard](https://via.placeholder.com/1200x600?text=PentesterFlow+Dashboard)
+![PentesterFlow Dashboard](https://via.placeholder.com/1200x600?text=PentesterFlow+AI+DAST+Command+Center)
 
 ## 🌟 Overview
-**PentesterFlow** is an agentic dynamic application security testing (DAST) platform that uses AI to intelligently discover, test, and validate web application vulnerabilities. Unlike traditional scanners, PentesterFlow uses contextual reasoning to find complex business logic flaws (BOLA, IDOR) and validates findings with LLMs to minimize false positives.
-
-It combines the speed of automated scanners (Nuclei, Nmap) with the reasoning capabilities of Large Language Models (Gemini/GPT-4) to serve as an autonomous junior pentester for your team.
+**PentesterFlow** is a professional-grade agentic dynamic application security testing (DAST) platform. It leverages autonomous AI agents to intelligently discover, test, and validate vulnerabilities in web applications and infrastructure. Unlike traditional scanners, PentesterFlow uses contextual reasoning and LLM-backed validation to minimize noise and provide actionable security intelligence.
 
 ---
 
 ## 🚀 Key Features
 
-### 1. Autonomous AI Agents
-- **Recon Agent**: Crawls modern SPAs using Playwright to discover hidden endpoints and map application logic.
-- **Attack Agent**: Context-aware payload generation that tests for SQLi, XSS, BOLA, and more based on the specific endpoint structure.
-- **Validation Agent**: Uses LLM reasoning to analyze responses and filter out false positives with >90% accuracy.
-- **Reporting Agent**: Generates executive summaries, technical details, and Proof of Concept (PoC) scripts automatically.
+### 1. Autonomous AI Agent Workflow
+- **Recon Agent**: Automatically maps application structure and runs **Nmap infrastructure discovery** to find hidden ports and services.
+- **Attack Agent**: Generates context-aware payloads (SQLi, XSS, BOLA) and evaluates infrastructure risks like unauthenticated databases.
+- **Validation Agent**: Uses Google Gemini (1.5-Flash) to filter false positives with high precision.
+- **Reporting Agent**: Generates professional PDF reports with executive summaries and Python-based PoC scripts.
 
-### 2. Modern DAST Capabilities
-- **Business Logic Testing**: Detects authorization flaws like BOLA/IDOR by understanding user context.
-- **Real-Time Log Console**: Watch the AI agents "think" and execute steps in real-time.
-- **PoC Generation**: Get copy-paste Python scripts to reproduce and verify every finding.
+### 2. Professional Security Dashboard
+- **Real-Time AI Console**: Track agent reasoning chains as they navigate and test your targets.
+- **Integrated Vulnerability Lab**: Manage, verify, and resolve findings in a unified interface.
+- **Dynamic Risk Engine**: Automatically calculates a security health score based on asset criticality and vulnerability severity.
 
-### 3. Enterprise Dashboard
-- **Target Management**: Organize assets and track security posture over time.
-- **Vulnerability Laboratory**: Interactive view to analyze, verify, and manage vulnerability findings.
-- **Network Intelligence**: (Legacy) Deep network scanning and asset inventory tracking.
+### 3. Unified Simulation Lab
+- Includes a one-click **Vulnerable Lab Environment** to test the platform against real-world scenarios (Juice Shop, Redis, Nginx).
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Component | Technology | Role |
-| :--- | :--- | :--- |
-| **Orchestration** | Python / LangGraph-style | Multi-agent coordination and state management |
-| **Backend** | FastAPI | High-performance Async API |
-| **Frontend** | React / Vite | Real-time interactive dashboard |
-| **Scanning** | Playwright & Nuclei | Browser automation and vulnerability scanning |
-| **AI/LLM** | Gemini Pro / GPT-4 | Reasoning, validation, and reporting |
-| **Database** | PostgreSQL | Relational data storage |
+| Layer | Technology |
+| :--- | :--- |
+| **Orchestrator** | Python / Agentic Workflow (LangGraph style) |
+| **Backend** | FastAPI / SQLAlchemy / PostgreSQL |
+| **Frontend** | React / Vite / Tailwind CSS / Lucide Icons |
+| **Task Queue** | Celery / Redis |
+| **AI / LLM** | Google Gemini 1.5 Flash |
+| **Scanners** | Nmap / Playwright / Nuclei |
 
 ---
 
-## 🚦 Installation & Setup
+## 🚦 Quick Start
 
-### Prerequisites
-*   Docker & Docker Compose
-*   Gemini API Key (or OpenAI Key)
-
-### Quick Start
+### 1. Clone & Configure
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-org/pentesterflow.git
-
-# 2. Add your API Key
-# Create a .env file and add: GEMINI_API_KEY=your_key_here
-
-# 3. Start the platform
-docker-compose up --build
-
-# 4. Access the Dashboard
-http://localhost:5173
+git clone https://github.com/omarkapil/the-dashboard-project-.git
+cd the-dashboard-project-
+```
+Create a `.env` file in the root:
+```env
+GEMINI_API_KEY=your_key_here
 ```
 
----
+### 2. Launch the Platform
+```bash
+docker-compose up -d --build
+```
 
-## 🔮 Roadmap & Future Plans
+### 3. Start the Simulation Lab (Optional)
+```bash
+docker-compose -f docker-compose.lab.yml up -d
+```
 
-### Phase 1: Enhanced AI & Customization (Immediate)
-- [ ] **Custom Training**: Fine-tune models on internal vulnerability reports.
-- [ ] **Autonomous Exploitation**: Safe, automated verification of complex exploit chains (e.g., XSS to ATO).
-- [ ] **Visual Reconnaissance**: Computer vision analysis for visual vulnerabilities.
-
-### Phase 2: Collaboration (Mid-Term)
-- [ ] **Multi-User RBAC**: Enhanced permissions for teams (Admin, Pentester, Viewer).
-- [ ] **Real-time Collaboration**: Shared workspaces for joint pentesting sessions.
-- [ ] **Ticket Integration**: Two-way sync with Jira/Linear.
-
-### Phase 3: Advanced Ecosystem (Long-Term)
-- [ ] **Cloud Posture (CSPM)**: Integration with AWS/Azure/GCP scanning.
-- [ ] **API Deep Dive**: Specialized agents for GraphQL and gRPC testing.
-- [ ] **Compliance Auto-Mapping**: Map findings directly to SOC2, PCI-DSS, and ISO 27001 controls.
+### 4. Access the Command Center
+Go to [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## 📄 Documentation
-Full documentation is available in the `/docs` directory or via the "Reports" tab in the dashboard.
+## 🧪 Scanning the Lab
+To see the full power of the AI agents:
+1. Add target `http://lab_gateway`.
+2. Click **AI Scan**.
+3. Watch the findings (Redis, Juice Shop, etc.) appear in the **History** and **Reports** tabs.
+
+---
+
+## 🔮 Roadmap
+- [ ] Custom LLM Fine-tuning for security reports.
+- [ ] Two-way Jira/Linear integration.
+- [ ] Cloud Security Posture Management (CSPM).
 
 ---
 

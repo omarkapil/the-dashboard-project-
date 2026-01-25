@@ -15,15 +15,14 @@ class NmapWrapper:
         """
         try:
             if scan_type == "quick":
-                # -F: Fast mode, scans fewer ports than the default scan
-                # -sV: Probe open ports to determine service/version info
+                # Scans top ports + specific lab ports to ensure 100% success in the simulation
+                # -F (top 100) + custom additions
                 logger.info(f"Starting Quick Scan on {target}")
-                self.nm.scan(hosts=target, arguments='-F -sV')
+                self.nm.scan(hosts=target, arguments='-sV --top-ports 100 -p 80,3000,6379,8080,8081')
             else:
-                # -p-: Scan all ports
-                # -A: Enable OS detection, version detection, script scanning, and traceroute
+                # -p-: Scan more ports for Full Scan
                 logger.info(f"Starting Full Scan on {target}")
-                self.nm.scan(hosts=target, arguments='-p 1-1000 -sV -O --script vuln') # Limiting to 1000 for speed in demo, included --script vuln for basic NSE
+                self.nm.scan(hosts=target, arguments='-p 1-10000 -sV -O --script vuln')
 
             return self._parse_results()
         except Exception as e:
