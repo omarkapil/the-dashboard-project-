@@ -36,6 +36,15 @@
 | **AI / LLM** | Google Gemini 1.5 Flash |
 | **Scanners** | Nmap / Playwright / Nuclei |
 
+## 📄 Documentation & Deep Dives
+
+For a technical deep dive into the system, please refer to the following guides:
+
+- **[Architecture Guide](docs/ARCHITECTURE.md)**: System design, data flow, and tech stack details.
+- **[API Reference](docs/API_GUIDE.md)**: Full REST API documentation for integrations.
+- **[AI Agent Workflow](docs/AGENT_WORKFLOW.md)**: How the Recon, Attack, and Validation agents work.
+- **[Future Work & Roadmap](FUTURE_WORK.md)**: Planned features and contribution areas.
+
 ---
 
 ## 🚦 Quick Start
