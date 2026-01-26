@@ -9,19 +9,21 @@
 
 ## 🚀 Key Features
 
-### 1. Autonomous AI Agent Workflow
-- **Recon Agent**: Automatically maps application structure and runs **Nmap infrastructure discovery** to find hidden ports and services.
-- **Attack Agent**: Generates context-aware payloads (SQLi, XSS, BOLA) and evaluates infrastructure risks like unauthenticated databases.
-- **Validation Agent**: Uses Google Gemini (1.5-Flash) to filter false positives with high precision.
-- **Reporting Agent**: Generates professional PDF reports with executive summaries and Python-based PoC scripts.
+### 1. Advanced Asset Discovery & Topology
+- **Deep Network Scanning**: Integrates **Nmap** with OS detection (`-O`) and Aggressive Service Scan (`-A`).
+- **Visual Topology**: Interactive 2D graph visualization of network assets (Gateways, Servers, Workstations).
+- **Device Fingerprinting**: Automatically identifies OS (Windows/Linux/Cisco) and Device Type (Mobile/Server/Router) using heuristic analysis.
 
-### 2. Professional Security Dashboard
-- **Real-Time AI Console**: Track agent reasoning chains as they navigate and test your targets.
-- **Integrated Vulnerability Lab**: Manage, verify, and resolve findings in a unified interface.
-- **Dynamic Risk Engine**: Automatically calculates a security health score based on asset criticality and vulnerability severity.
+### 2. Autonomous AI Agent Workflow
+- **Recon Agent**: Automatically maps application structure and identifies hidden ports and services.
+- **Attack Agent**: Generates context-aware payloads (SQLi, XSS, BOLA).
+- **Vulnerability Engine**: Now powered by **Nuclei** for deep, template-based vulnerability scanning (CVEs, Misconfigurations).
+- **Validation Agent**: Uses Google Gemini (1.5-Flash) to filter false positives.
 
-### 3. Unified Simulation Lab
-- Includes a one-click **Vulnerable Lab Environment** to test the platform against real-world scenarios (Juice Shop, Redis, Nginx).
+### 3. Professional Security Dashboard
+- **Asset Detail Panel**: Rich slide-out panel showing MAC Vendor, Uptime, and detailed Service Versions per asset.
+- **Real-Time Risk Score**: Dynamic scoring engine (0-100) that caps your score based on detected vulnerabilities.
+- **Unified Simulation Lab**: 5-node virtual corporate network for realistic training and testing.
 
 ---
 
@@ -29,21 +31,18 @@
 
 | Layer | Technology |
 | :--- | :--- |
-| **Orchestrator** | Python / Agentic Workflow (LangGraph style) |
-| **Backend** | FastAPI / SQLAlchemy / PostgreSQL |
+| **Orchestrator** | Python / Agentic Workflow |
+| **Backend** | FastAPI / SQLAlchemy / PostgreSQL / Celery |
 | **Frontend** | React / Vite / Tailwind CSS / Lucide Icons |
-| **Task Queue** | Celery / Redis |
+| **Discovery** | **Nmap** (OS Detection) / **Netcat** (Simulation) |
+| **Scanning** | **Nuclei** (Vulnerabilities) / Subfinder |
 | **AI / LLM** | Google Gemini 1.5 Flash |
-| **Scanners** | Nmap / Playwright / Nuclei |
 
-## 📄 Documentation & Deep Dives
+## 📄 Documentation & Guides
 
-For a technical deep dive into the system, please refer to the following guides:
-
-- **[Architecture Guide](docs/ARCHITECTURE.md)**: System design, data flow, and tech stack details.
-- **[API Reference](docs/API_GUIDE.md)**: Full REST API documentation for integrations.
-- **[AI Agent Workflow](docs/AGENT_WORKFLOW.md)**: How the Recon, Attack, and Validation agents work.
-- **[Future Work & Roadmap](FUTURE_WORK.md)**: Planned features and contribution areas.
+- **[Lab Guide](LAB_GUIDE.md)**: How to deploy the 5-node Virtual Corp Network.
+- **[Architecture](docs/ARCHITECTURE.md)**: System design and data flow.
+- **[API Reference](docs/API_GUIDE.md)**: REST API endpoints.
 
 ---
 
@@ -54,39 +53,45 @@ For a technical deep dive into the system, please refer to the following guides:
 git clone https://github.com/omarkapil/the-dashboard-project-.git
 cd the-dashboard-project-
 ```
-Create a `.env` file in the root:
+Create a `.env` file:
 ```env
 GEMINI_API_KEY=your_key_here
 ```
 
-### 2. Launch the Platform
+### 2. Launch Platform
 ```bash
 docker-compose up -d --build
 ```
 
-### 3. Start the Simulation Lab (Optional)
+### 3. Launch Virtual Lab (Optional)
+Deploy the simulated corporate network:
 ```bash
 docker-compose -f docker-compose.lab.yml up -d
 ```
 
-### 4. Access the Command Center
-Go to [http://localhost:5173](http://localhost:5173)
+### 4. Access Command Center
+Go to [http://localhost:5173](http://localhost:5173).
 
 ---
 
-## 🧪 Scanning the Lab
-To see the full power of the AI agents:
-1. Add target `http://lab_gateway`.
-2. Click **AI Scan**.
-3. Watch the findings (Redis, Juice Shop, etc.) appear in the **History** and **Reports** tabs.
+## 🧪 How to Test (The "Happy Path")
+1.  **Start the Lab**: Run the command in Step 3.
+2.  **Scan the Network**:
+    *   Go to **Dashboard**.
+    *   Enter Target: `172.18.0.0/24` (or your dynamic Docker subnet).
+    *   Click **Scan**.
+3.  **Explore**:
+    *   Go to **Network Topology**.
+    *   Click on nodes (Router, Redis, Windows PC).
+    *   See vulnerabilities like **Open Redis** or **SMB**.
 
 ---
 
 ## 🔮 Roadmap
-- [ ] Custom LLM Fine-tuning for security reports.
-- [ ] Two-way Jira/Linear integration.
+- [ ] TShark/Wireshark Traffic Analysis Integration.
+- [ ] Automated Report PDF Export.
 - [ ] Cloud Security Posture Management (CSPM).
 
 ---
 
-**PentesterFlow** — *The Future of AI-Native Security Testing.*
+**PentesterFlow** — *AI-Native Asset Discovery & Security Testing.*

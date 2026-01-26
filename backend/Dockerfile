@@ -1,6 +1,9 @@
 # Stage 1: Get Subfinder binary
 FROM projectdiscovery/subfinder:latest AS subfinder
 
+# Stage 1.5: Get Nuclei binary
+FROM projectdiscovery/nuclei:latest AS nuclei
+
 # Stage 2: Final Image
 FROM python:3.10-slim
 
@@ -11,8 +14,9 @@ RUN apt-get update && apt-get install -y \
     nmap \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy subfinder binary from Stage 1
+# Copy binaries
 COPY --from=subfinder /usr/local/bin/subfinder /usr/local/bin/subfinder
+COPY --from=nuclei /usr/local/bin/nuclei /usr/local/bin/nuclei
 
 # Install Trivy
 RUN apt-get update && apt-get install -y wget && \

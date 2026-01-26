@@ -229,14 +229,50 @@ class ScanAsset(Base):
     id = Column(Integer, primary_key=True, index=True)
     scan_id = Column(String(36), ForeignKey("scans.id"))
     
+    # Identity
     ip_address = Column(String, index=True)
     hostname = Column(String, nullable=True)
     mac_address = Column(String, nullable=True)
+    mac_vendor = Column(String, nullable=True) # New: Manufacturer
+    
+    # OS Details
     os_name = Column(String, nullable=True)
+    os_family = Column(String, nullable=True) # Windows, Linux, etc.
+    os_accuracy = Column(Integer, nullable=True)
+    
+    # Device Meta
     device_type = Column(String, default="unknown")
+    uptime = Column(String, nullable=True)
     is_new = Column(String, default="false")
     
+    first_seen = Column(DateTime, default=datetime.utcnow)
+    last_seen = Column(DateTime, default=datetime.utcnow)
+    
     scan = relationship("Scan", back_populates="assets")
+    services = relationship("AssetService", back_populates="asset", cascade="all, delete-orphan")
+
+
+class AssetService(Base):
+    """
+    Detailed running services found on an asset.
+    """
+    __tablename__ = "asset_services"
+
+    id = Column(Integer, primary_key=True, index=True)
+    asset_id = Column(Integer, ForeignKey("scan_assets.id", ondelete="CASCADE"))
+    
+    port = Column(Integer, nullable=False)
+    protocol = Column(String(10), default="tcp") # tcp/udp
+    state = Column(String(20), default="open") # open, filtered, closed
+    
+    service_name = Column(String(100), nullable=True) # http, ssh, etc.
+    product = Column(String(255), nullable=True) # Apache httpd
+    version = Column(String(100), nullable=True) # 2.4.49
+    cpe = Column(String(255), nullable=True) # cpe:/a:apache:http_server:2.4.49
+    
+    extra_info = Column(Text, nullable=True) # "Ubuntu", "protocol 2.0", keys
+
+    asset = relationship("ScanAsset", back_populates="services")
 
 
 class NetworkAsset(Base):

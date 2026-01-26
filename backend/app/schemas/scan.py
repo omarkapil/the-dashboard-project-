@@ -208,14 +208,42 @@ class EndpointResponse(BaseModel):
 # LEGACY SCHEMAS (backward compatibility)
 # ============================================================================
 
+class AssetServiceResponse(BaseModel):
+    port: int
+    protocol: str
+    state: str
+    service_name: Optional[str] = None
+    product: Optional[str] = None
+    version: Optional[str] = None
+    cpe: Optional[str] = None
+    extra_info: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
 class ScanAssetResponse(BaseModel):
     id: int
     scan_id: str
+    
+    # Identity
     ip_address: str
     hostname: Optional[str] = None
     mac_address: Optional[str] = None
+    mac_vendor: Optional[str] = None
+    
+    # OS
     os_name: Optional[str] = None
+    os_family: Optional[str] = None
+    os_accuracy: Optional[int] = None
+    
+    # Meta
     device_type: str = "unknown"
+    uptime: Optional[str] = None
+    is_new: Optional[str] = "false"
+    
+    # Nested Services
+    services: List[AssetServiceResponse] = []
 
     class Config:
         from_attributes = True

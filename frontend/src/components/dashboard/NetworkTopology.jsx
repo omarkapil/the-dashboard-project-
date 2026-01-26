@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { scanService } from '../../services/api';
 import { Loader, Move, ZoomIn, ZoomOut, RefreshCw, Smartphone, Server, Monitor, Radio, Shield } from 'lucide-react';
+import AssetDetailPanel from './AssetDetailPanel';
 
 const NetworkTopology = ({ refresh }) => {
     const [graphData, setGraphData] = useState({ nodes: [], links: [] });
@@ -70,9 +71,18 @@ const NetworkTopology = ({ refresh }) => {
 
     const determineGroup = (asset) => {
         const type = (asset.device_type || '').toLowerCase();
+        const os = (asset.os_family || '').toLowerCase();
+
+        // Primary: Device Type
         if (type.includes('server')) return 'server';
-        if (type.includes('mobile')) return 'mobile';
-        if (type.includes('router') || type.includes('gateway')) return 'router';
+        if (type.includes('router') || type.includes('gateway') || type.includes('wap')) return 'router';
+        if (type.includes('phone') || type.includes('mobile')) return 'mobile';
+
+        // Fallback: OS Family
+        if (os.includes('server') || os.includes('linux')) return 'server';
+        if (os.includes('ios') || os.includes('android')) return 'mobile';
+        if (os.includes('cisco') || os.includes('bsd')) return 'router';
+
         return 'desktop';
     };
 
@@ -86,7 +96,7 @@ const NetworkTopology = ({ refresh }) => {
         setSelectedNode(node);
         // Aim at node from outside it
         const distance = 40;
-        const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+        const distRatio = 1 + distance / Math.hypot(node.x, node.y);
 
         fgRef.current.centerAt(
             node.x * distRatio,
@@ -166,59 +176,25 @@ const NetworkTopology = ({ refresh }) => {
                 />
             </div>
 
-            {/* Details Panel */}
-            <div className="bg-cyber-light rounded-xl border border-gray-700 p-6 h-fit">
+            {/* Details Panel - Floating or Grid Column */}
+            <div className={`transition-all duration-300 ${selectedNode && selectedNode.id !== 'hub' ? 'col-span-1 opacity-100' : 'hidden lg:block lg:col-span-1 lg:opacity-50 pointer-events-none'}`}>
                 {selectedNode && selectedNode.id !== 'hub' ? (
-                    <div className="animate-fade-in">
-                        <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-700">
-                            <div className="p-3 bg-gray-800 rounded-lg">
-                                {selectedNode.group === 'server' && <Server className="h-6 w-6 text-purple-400" />}
-                                {selectedNode.group === 'mobile' && <Smartphone className="h-6 w-6 text-pink-400" />}
-                                {selectedNode.group === 'desktop' && <Monitor className="h-6 w-6 text-blue-400" />}
-                                {selectedNode.group === 'router' && <Radio className="h-6 w-6 text-yellow-400" />}
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-white">{selectedNode.name}</h3>
-                                <p className="text-gray-400 text-sm font-mono">{selectedNode.ip}</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex justify-between items-center">
-                                <span className="text-gray-400">Security Status</span>
-                                <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${selectedNode.vulnCount > 0 ? 'bg-red-900/50 text-red-400 border border-red-800' : 'bg-green-900/50 text-green-400 border border-green-800'}`}>
-                                    {selectedNode.vulnCount > 0 ? 'Compromised' : 'Secure'}
-                                </span>
-                            </div>
-
-                            <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-                                <div className="flex items-center gap-2 mb-2 text-gray-400">
-                                    <Shield className="h-4 w-4" />
-                                    <span className="text-sm font-bold uppercase">Vulnerabilities</span>
-                                </div>
-                                <div className="text-3xl font-bold text-white">{selectedNode.vulnCount}</div>
-                                <p className="text-xs text-gray-500 mt-1">Found in last scan</p>
-                            </div>
-
-                            {selectedNode.details.os_name && (
-                                <div className="p-4 rounded-xl border border-gray-700">
-                                    <span className="text-gray-500 text-xs uppercase block mb-1">Operating System</span>
-                                    <span className="text-white">{selectedNode.details.os_name}</span>
-                                </div>
-                            )}
-
-                            {selectedNode.details.mac_address && (
-                                <div className="p-4 rounded-xl border border-gray-700">
-                                    <span className="text-gray-500 text-xs uppercase block mb-1">MAC Address</span>
-                                    <span className="text-white font-mono">{selectedNode.details.mac_address}</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <AssetDetailPanel
+                        node={selectedNode}
+                        onClose={() => {
+                            setSelectedNode(null);
+                            fgRef.current.zoomToFit(400);
+                        }}
+                    />
                 ) : (
-                    <div className="text-center py-12 text-gray-500">
-                        <Move className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                        <p>Select a node in the graph to view device details.</p>
+                    <div className="h-full bg-gray-900/50 border border-gray-800 rounded-xl flex flex-col justify-center items-center text-center p-8 border-dashed">
+                        <div className="bg-gray-800 p-4 rounded-full mb-4 opacity-50">
+                            <Move className="h-8 w-8 text-cyan-400" />
+                        </div>
+                        <h3 className="text-gray-400 font-bold text-lg mb-2">Interactive Topology</h3>
+                        <p className="text-gray-600 text-sm max-w-xs">
+                            Click on any node in the network graph to view deep inspection details like OS version, open ports, and vulnerabilities.
+                        </p>
                     </div>
                 )}
             </div>

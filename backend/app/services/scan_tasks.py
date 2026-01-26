@@ -1,7 +1,7 @@
 from app.core.celery_app import celery_app
 from app.services.nmap_wrapper import NmapWrapper
 from app.core.database import SessionLocal
-from app.models.scan import Scan, Vulnerability, ScanStatus, ScanAsset, ActionItem, Target
+from app.models.scan import Scan, Vulnerability, ScanStatus, ScanAsset, AssetService, ActionItem, Target
 from app.services.risk_engine import RiskCalculator, ActionGenerator
 from app.services.asset_monitor import AssetMonitor
 from datetime import datetime
@@ -52,46 +52,100 @@ def run_scan_task(self, scan_id: int):
         
         for host_data in results:
             ip = host_data['ip']
+            
+            # 1. Create/Update Scan Asset
             if ip not in seen_hosts:
-                # Create Scan Asset
                 asset = ScanAsset(
                     scan_id=scan.id,
                     ip_address=ip,
-                    hostname=host_data.get('hostname'),
+                    hostname=host_data.get('hostnames'),
                     mac_address=host_data.get('mac'),
+                    mac_vendor=host_data.get('mac_vendor'),
                     os_name=host_data.get('os_name'),
-                    device_type=host_data.get('device_type', 'unknown')
+                    os_accuracy=host_data.get('os_accuracy'),
+                    device_type=host_data.get('device_type', 'unknown'),
+                    is_new="true" # Flag for notification
                 )
                 db.add(asset)
+                db.flush() # Flush to get asset.id for services
                 seen_hosts.add(ip)
             
-            for port_data in host_data['ports']:
+                # 2. Save Services
+                for port_data in host_data['ports']:
+                    # Add to AssetService table
+                    service = AssetService(
+                        asset_id=asset.id,
+                        port=port_data['port'],
+                        protocol=port_data['protocol'],
+                        state=port_data['state'],
+                        service_name=port_data['service'],
+                        product=port_data['product'],
+                        version=port_data['version'],
+                        cpe=port_data.get('cpe'),
+                        extra_info=port_data.get('extra_info')
+                    )
+                    db.add(service)
+
+                    # Add to Vulnerabilities table (Active Risks)
+                    # We still create these so the Risk Engine works
+                    vuln = Vulnerability(
+                        scan_id=scan.id,
+                        host=host_data['ip'],
+                        port=port_data['port'],
+                        protocol=port_data['protocol'],
+                        service=port_data['service'],
+                        severity=port_data['severity'],
+                        url=f"{port_data['protocol']}://{host_data['ip']}:{port_data['port']}",
+                        description=f"Service: {port_data['product']} {port_data['version']}",
+                        remediation="Update service or firewall port."
+                    )
+                    
+                    db.add(vuln)
+                    vuln_count += 1
+                    
+                    # Collect for Risk Engine
+                    all_vulns.append({
+                        "host": host_data['ip'],
+                        "severity": port_data['severity'],
+                        "cve_id": "",
+                        "description": f"Service: {port_data['product']}"
+                    })
+        
+        # 3. Deep Vulnerability Scan (Nuclei)
+        try:
+            from app.services.nuclei_wrapper import NucleiWrapper
+            nuclei = NucleiWrapper()
+            nuclei_findings = nuclei.scan_target(clean_target, scan_type=scan.scan_type)
+            
+            for finding in nuclei_findings:
                 vuln = Vulnerability(
                     scan_id=scan.id,
-                    host=host_data['ip'],
-                    port=port_data['port'],
-                    protocol=port_data['protocol'],
-                    service=port_data['service'],
-                    severity=port_data['severity'],
-                    url=f"{port_data['protocol']}://{host_data['ip']}:{port_data['port']}",
-                    description=f"Service: {port_data['product']} {port_data['version']}",
-                    remediation="Update service or firewall port." # Placeholder
+                    type=finding['type'],
+                    severity=finding['severity'],
+                    description=finding['description'],
+                    url=finding['url'],
+                    host=clean_target,
+                    service="http" if "http" in finding['url'] else "unknown", # Deduce service
+                    cve_id=finding['cve_id'],
+                    proof_of_concept=str(finding['evidence']),
+                    remediation="Refer to CVE mitigation.",
+                    status="OPEN"
                 )
-                
                 db.add(vuln)
                 vuln_count += 1
-                
-                # Collect for Risk Engine
                 all_vulns.append({
-                    "host": host_data['ip'],
-                    "severity": port_data['severity'],
-                    "cve_id": "",
-                    "description": f"Service: {port_data['product']}"
+                    "host": clean_target,
+                    "severity": finding['severity'],
+                    "cve_id": finding['cve_id'],
+                    "description": finding['description']
                 })
-        
-        # Prepare Data for Engines
+                
+        except Exception as e:
+            logger.error(f"Nuclei scan failed or skipped: {e}")
+
+        # Prepare Data for Risk Engine
         scan_data = {
-            "assets": results, # Nmap results structure matches what we need mostly
+            "assets": results, 
             "vulnerabilities": all_vulns
         }
 

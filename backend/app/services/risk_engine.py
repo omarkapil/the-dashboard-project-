@@ -42,7 +42,11 @@ class RiskCalculator:
                 if port in RiskCalculator.HIGH_RISK_PORTS and port_data.get('state') == 'open':
                     score -= 15
 
-        return float(max(0, score))
+        # 3. Cap score if vulnerabilities exist
+        if len(vulns) > 0 and score > 90:
+             score = 90 # Cap at A- if any vulnerability exists
+
+        return float(max(0, min(100, score)))
 
 class ActionGenerator:
     """
