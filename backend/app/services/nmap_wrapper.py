@@ -8,25 +8,29 @@ class NmapWrapper:
     def __init__(self):
         self.nm = nmap.PortScanner()
 
-    def scan_target(self, target: str, scan_type: str = "quick"):
+    def scan_target(self, target, scan_type="quick"):
         """
-        Executes an Nmap scan.
-        scan_type: 'quick' (Top 100 ports) or 'full' (all ports, service detection)
+        Executes Nmap scan.
+        scan_type options:
+        - quick: Fast port scan
+        - full: Detailed service detection
+        - deep: OpenVAS-style advanced discovery with NSE scripts
         """
         try:
-            if scan_type == "quick":
-                # Quick but still try to get OS and Service info
-                logger.info(f"Starting Quick Discovery on {target}")
-                self.nm.scan(hosts=target, arguments='-sV -O --osscan-guess --top-ports 100 -p 80,3000,6379,8080,8081')
+            logger.info(f"Starting {scan_type} Nmap scan on {target}")
+            
+            if scan_type == "deep":
+                # Advanced Discovery: OS detection, Service version, and NSE scripts
+                self.nm.scan(target, arguments="-sV -O -A -T4 --script=vulners,banner,http-enum,smb-os-discovery")
+            elif scan_type == "full":
+                self.nm.scan(target, arguments="-sV -T4")
             else:
-                # Deep Inspection: All ports, OS, Service Version, Traceroute (-A does most of this)
-                logger.info(f"Starting Deep Inspection on {target}")
-                self.nm.scan(hosts=target, arguments='-A -p 1-10000 -T4')
+                self.nm.scan(target, arguments="-F -T4") # Fast scan (top 100 ports)
 
             return self._parse_results()
         except Exception as e:
             logger.error(f"Nmap scan failed: {e}")
-            raise e
+            return []
 
     def _parse_results(self):
         """
@@ -81,23 +85,23 @@ class NmapWrapper:
                 lport = self.nm[host][proto].keys()
                 for port in lport:
                     service_info = self.nm[host][proto][port]
-                    port_data = {
-                        "port": port,
-                        "protocol": proto,
-                        "state": service_info['state'],
-                        "service": service_info.get('name', 'unknown'),
-                        "product": service_info.get('product', ''),
-                        "version": service_info.get('version', ''),
-                        "cpe": service_info.get('cpe', ''),
-                        "extra_info": service_info.get('extrainfo', ''),
-                        "severity": "INFO"
-                    }
-                    
-                    # Check for script output (vulnerabilities)
-                    if 'script' in service_info:
-                        port_data['scripts'] = service_info['script']
-                        if any('vuln' in k or 'cve' in k for k in service_info['script']):
-                            port_data['severity'] = "HIGH"
+                port_data = {
+                    "port": port,
+                    "protocol": proto,
+                    "state": service_info['state'],
+                    "service": service_info.get('name', 'unknown'),
+                    "product": service_info.get('product', ''),
+                    "version": service_info.get('version', ''),
+                    "cpe": service_info.get('cpe', ''),
+                    "extra_info": service_info.get('extrainfo', ''),
+                    "severity": "info"
+                }
+                
+                # Check for script output (vulnerabilities)
+                if 'script' in service_info:
+                    port_data['scripts'] = service_info['script']
+                    if any('vuln' in k or 'cve' in k for k in service_info['script']):
+                        port_data['severity'] = "high"
                             
                     host_info['ports'].append(port_data)
             

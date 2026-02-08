@@ -872,7 +872,7 @@ for user_id in range(1, 10):
 class AgentOrchestrator:
     """
     Coordinates all agents in the correct sequence.
-    Implements the PentesterFlow agent workflow.
+    Implements the found 404 agent workflow.
     """
     
     def __init__(self, scan_id: str):

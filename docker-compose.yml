@@ -10,6 +10,9 @@ services:
       - DATABASE_URL=postgresql://user:password@db:5432/sme_cyber_db
       - REDIS_URL=redis://redis:6379/0
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks:
+      - default
+      - lab_network
     depends_on:
       - db
       - redis
@@ -53,6 +56,9 @@ services:
       - DATABASE_URL=postgresql://user:password@db:5432/sme_cyber_db
       - REDIS_URL=redis://redis:6379/0
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks:
+      - default
+      - lab_network
     depends_on:
       - backend
       - redis
@@ -68,6 +74,12 @@ services:
     depends_on:
       - backend
       - redis
+
+networks:
+  default:
+  lab_network:
+    external: true
+    name: the-dashboard-project-_lab_network
 
 volumes:
   postgres_data:

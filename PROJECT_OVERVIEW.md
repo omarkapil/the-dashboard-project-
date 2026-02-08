@@ -1,26 +1,26 @@
-# PentesterFlow: Project Overview (Q&A)
+# found 404: Intelligence-Driven Security (Q&A)
 
-This document provides a comprehensive explanation of the PentesterFlow platform, its goals, features, and the technologies that power it.
+This document provides a comprehensive explanation of the **found 404** platform, its goals, features, and the technologies that power it.
 
 ---
 
 ## 🎯 General Goals & Vision
 
-### Q: What is PentesterFlow?
-**A:** PentesterFlow is a professional-grade **Agentic Dynamic Application Security Testing (DAST)** platform. It is designed to act as an autonomous security researcher that doesn't just scan for bugs but "understands" the context of the applications it tests.
+### Q: What is found 404?
+**A:** found 404 is a professional-grade **Intelligence-Driven Security** platform. It acts as an autonomous security hub that doesn't just scan for bugs but "understands" the neural topology of the applications and infrastructure it protects.
 
-### Q: Why was PentesterFlow created?
-**A:** Traditional security scanners often produce a lot of "noise" (false positives) and lack the context to understand complex application flows. PentesterFlow was created to bridge this gap by using **AI Agents** that can reason about vulnerabilities, validate findings, and provide actionable security intelligence.
+### Q: Why was found 404 created?
+**A:** Traditional scanners often produce a lot of "noise" and lack the context to understand complex network relationships. found 404 was created to bridge this gap by using **Neural Network Topology** and **AI Intelligence Agents** that reason about exposures and identify critical risk paths.
 
 ---
 
 ## 🚀 Core Features
 
-### Q: What makes PentesterFlow "Agentic"?
+### Q: What makes found 404 "Agentic"?
 **A:** Instead of a linear script, the platform uses specialized AI agents:
-- **Recon Agent**: Maps out the target and finds hidden entry points.
-- **Attack Agent**: Crafts specific payloads based on the technologies it discovers.
-- **Validation Agent**: Uses LLMs (Google Gemini) to double-check if a vulnerability is real or a false alarm.
+- **Intelligence Agent**: Synthesizes discovery results into specialized "Device Knowledge".
+- **Risk Engine**: Calculates exposure scores based on business context and technical findings.
+- **Validation Hub**: Uses Gemini Pro to reasoning through scan data and filter out noise.
 
 ### Q: How does it handle asset discovery?
 **A:** It integrates deeply with **Nmap** for network scanning, OS detection, and service fingerprinting. It then visualizes this data in an interactive **Network Topology Graph**, making it easy to see the "attack surface."
@@ -48,7 +48,7 @@ This document provides a comprehensive explanation of the PentesterFlow platform
 - **Icons**: **Lucide React**.
 
 ### Q: How is AI integrated?
-**A:** The platform uses **Google Gemini 1.5 Flash** via the `google-generativeai` SDK. Gemini acts as the "brain," reasoning through scan results and filtering out false positives.
+**A:** The platform uses **Gemini Pro** via the `google-generativeai` SDK. Gemini acts as the "core node brain," reasoning through scan results and generating strategic security insights.
 
 ---
 
@@ -66,7 +66,7 @@ This document provides a comprehensive explanation of the PentesterFlow platform
 
 ## ⚙️ Installation & Setup
 
-### Q: How do I get PentesterFlow running?
+### Q: How do I get found 404 running?
 **A:** 
 1. **Clone the Repo**: 
    ```bash
@@ -94,7 +94,7 @@ This creates 5 virtual nodes (Router, Windows PC, Linux Servers) with intentiona
 
 ## 🔮 The Future
 
-### Q: What's next for PentesterFlow?
+### Q: What's next for found 404?
 **A:** The roadmap includes:
 - **Vision Integration**: Using AI to "see" screenshots of web pages to find UI-level security issues.
 - **Enterprise Features**: Role-Based Access Control (RBAC) and integration with Jira/GitHub.

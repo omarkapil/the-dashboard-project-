@@ -20,18 +20,15 @@ class NucleiWrapper:
         """
         output_file = f"/tmp/nuclei_{os.urandom(4).hex()}.json"
         
-        # Build command
-        # -nc: no colors
-        # -j: json output
-        # -silent: show only results
-        cmd = [self.binary_path, "-u", target, "-json", "-o", output_file, "-silent"]
+        # Build command: -j for jsonl output, -o for output file
+        cmd = [self.binary_path, "-u", target, "-j", "-o", output_file, "-silent"]
         
         if scan_type == "quick":
             # Scan for critical/high CVEs and misconfigs
-            cmd.extend(["-s", "critical,high", "-t", "cves/,misconfiguration/"])
+            cmd.extend(["-s", "critical,high", "-as"])
         else:
             # Full scan
-            cmd.extend(["-s", "critical,high,medium", "-t", "cves/,misconfiguration/,exposures/,vulnerabilities/"])
+            cmd.extend(["-s", "critical,high,medium", "-as"])
             
         try:
             logger.info(f"Starting Nuclei scan on {target}: {' '.join(cmd)}")

@@ -72,107 +72,149 @@ const AgentLogViewer = ({ scanId, autoRefresh = true }) => {
 
     if (!scanId) {
         return (
-            <div className="bg-gray-900 p-6 rounded-xl border border-gray-700 text-center">
-                <Brain className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400">Select a scan to view agent logs</p>
+            <div className="glass-card p-12 text-center relative overflow-hidden group">
+                <div className="absolute inset-0 bg-cyber-accent/5 blur-3xl rounded-full scale-150 group-hover:bg-cyber-vibrant/5 transition-colors"></div>
+                <Brain className="h-16 w-16 text-gray-700 mx-auto mb-4 relative z-10" />
+                <p className="text-gray-400 font-medium relative z-10">INITIALIZING AI ADVISOR... <span className="animate-pulse">_</span></p>
+                <p className="text-gray-600 text-xs mt-2 relative z-10 uppercase tracking-widest">Select an active scan to bridge connection</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-gray-900 rounded-xl border border-gray-700 overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700">
-                <div className="flex items-center gap-2">
-                    <Terminal className="h-5 w-5 text-cyan-400" />
-                    <span className="text-white font-medium">AI Agent Console</span>
-                    <span className="text-gray-500 text-sm">({logs.length} events)</span>
+        <div className="glass-card border-cyber-accent/10 overflow-hidden relative group">
+            {/* Header / Console Top Bar */}
+            <div className="flex items-center justify-between px-6 py-4 bg-white/5 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <Terminal className="h-5 w-5 text-cyber-neon" />
+                        <div className="absolute -top-1 -right-1 h-2 w-2 bg-cyber-success rounded-full animate-ping"></div>
+                    </div>
+                    <div>
+                        <span className="text-white font-black text-sm uppercase tracking-widest">Neural Console</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono text-cyber-neon/60 uppercase">Stream Active</span>
+                            <span className="text-[10px] font-mono text-gray-500 uppercase">[{logs.length} Data Points]</span>
+                        </div>
+                    </div>
                 </div>
-                <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={autoScroll}
-                        onChange={(e) => setAutoScroll(e.target.checked)}
-                        className="rounded"
-                    />
-                    Auto-scroll
-                </label>
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-[10px] font-bold text-gray-400 cursor-pointer hover:text-white transition-colors uppercase tracking-tight">
+                        <input
+                            type="checkbox"
+                            checked={autoScroll}
+                            onChange={(e) => setAutoScroll(e.target.checked)}
+                            className="w-3 h-3 bg-transparent border-white/20 rounded focus:ring-0 text-cyber-neon"
+                        />
+                        Sync Scroll
+                    </label>
+                </div>
             </div>
 
-            {/* Logs Container */}
-            <div className="max-h-96 overflow-y-auto p-4 font-mono text-sm space-y-2">
+            {/* Logs Container / Viewport */}
+            <div className="max-h-[500px] overflow-y-auto p-6 font-mono text-xs space-y-3 relative">
+                {/* Scanning Line Effect (Visual Only) */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-cyber-neon/20 shadow-[0_0_10px_rgba(34,211,238,0.5)] animate-scan pointer-events-none"></div>
+
                 {loading && logs.length === 0 && (
-                    <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-6 w-6 text-cyan-400 animate-spin" />
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                        <Loader2 className="h-10 w-10 text-cyber-neon animate-spin" />
+                        <span className="text-[10px] font-bold text-cyber-neon/60 animate-pulse uppercase tracking-[0.3em]">Downloading Neural Memory...</span>
                     </div>
                 )}
 
                 {logs.map((log, index) => (
                     <div
                         key={log.id || index}
-                        className="border-l-2 border-gray-700 pl-3 py-1 hover:bg-gray-800/50 transition-colors"
+                        className="group/item relative pl-4 border-l border-white/5 hover:border-cyber-vibrant/40 transition-all py-1"
                     >
+                        {/* Dot Indicator */}
+                        <div className="absolute -left-[5px] top-3 h-2 w-2 rounded-full bg-white/10 group-hover/item:bg-cyber-vibrant group-hover/item:shadow-neon-purple transition-all"></div>
+
                         {/* Log Header */}
                         <div
-                            className="flex items-center gap-2 cursor-pointer"
+                            className="flex items-center gap-3 cursor-pointer group-hover/item:translate-x-1 transition-transform"
                             onClick={() => toggleExpand(log.id)}
                         >
-                            <span>{getAgentIcon(log.agent_name)}</span>
-                            <span className={`font-semibold ${getAgentColor(log.agent_name)}`}>
-                                [{log.agent_name?.replace('_agent', '').toUpperCase()}]
+                            <span className="text-lg opacity-80">{getAgentIcon(log.agent_name)}</span>
+                            <span className={`font-black tracking-tighter ${getAgentColor(log.agent_name)} drop-shadow-sm`}>
+                                {log.agent_name?.replace('_agent', '').toUpperCase()}
                             </span>
-                            <span className="text-gray-300">{log.action}</span>
-                            <span className="text-gray-600 text-xs ml-auto">
-                                {new Date(log.timestamp).toLocaleTimeString()}
+                            <span className="text-gray-300 font-medium group-hover/item:text-white transition-colors">{log.action}</span>
+
+                            <div className="flex-grow border-t border-dashed border-white/5 mx-2 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+
+                            <span className="text-[10px] font-bold text-gray-600 font-mono">
+                                {new Date(log.timestamp).toLocaleTimeString([], { hour12: false })}
                             </span>
+
                             {log.reasoning && (
-                                expanded[log.id] ? (
-                                    <ChevronUp className="h-4 w-4 text-gray-500" />
-                                ) : (
-                                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                                )
+                                <div className={`p-1 rounded bg-white/5 ${expanded[log.id] ? 'rotate-180' : ''} transition-transform`}>
+                                    <ChevronDown className="h-3 w-3 text-gray-500" />
+                                </div>
                             )}
                         </div>
 
-                        {/* Expanded Details */}
+                        {/* Expanded Details / Intelligence View */}
                         {expanded[log.id] && (
-                            <div className="mt-2 ml-6 space-y-2 text-xs">
+                            <div className="mt-4 ml-8 space-y-3 animate-fade-in">
                                 {log.reasoning && (
-                                    <div className="bg-gray-800 p-3 rounded">
-                                        <span className="text-purple-400">💭 Reasoning:</span>
-                                        <pre className="text-gray-300 mt-1 whitespace-pre-wrap">
-                                            {JSON.stringify(log.reasoning, null, 2)}
+                                    <div className="bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-cyber-vibrant/20 glow-purple">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="h-1 w-1 rounded-full bg-cyber-vibrant"></div>
+                                            <span className="text-[10px] font-black text-cyber-vibrant uppercase tracking-widest">Neural Chain-of-Thought</span>
+                                        </div>
+                                        <pre className="text-gray-300 text-[11px] leading-relaxed whitespace-pre-wrap font-mono">
+                                            {typeof log.reasoning === 'string' ? log.reasoning : JSON.stringify(log.reasoning, null, 2)}
                                         </pre>
                                     </div>
                                 )}
-                                {log.input_data && (
-                                    <div className="bg-gray-800 p-3 rounded">
-                                        <span className="text-blue-400">📥 Input:</span>
-                                        <pre className="text-gray-300 mt-1 whitespace-pre-wrap">
-                                            {JSON.stringify(log.input_data, null, 2)}
-                                        </pre>
-                                    </div>
-                                )}
-                                {log.output_data && (
-                                    <div className="bg-gray-800 p-3 rounded">
-                                        <span className="text-green-400">📤 Output:</span>
-                                        <pre className="text-gray-300 mt-1 whitespace-pre-wrap">
-                                            {JSON.stringify(log.output_data, null, 2)}
-                                        </pre>
-                                    </div>
-                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {log.input_data && (
+                                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                                            <span className="text-[9px] font-black text-cyber-accent uppercase tracking-widest block mb-2 opacity-60 italic">{'>>'} Inbound Payload</span>
+                                            <pre className="text-gray-400 text-[10px] whitespace-pre-wrap overflow-x-hidden">
+                                                {JSON.stringify(log.input_data, null, 2).substring(0, 500)}
+                                            </pre>
+                                        </div>
+                                    )}
+                                    {log.output_data && (
+                                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                                            <span className="text-[9px] font-black text-cyber-success uppercase tracking-widest block mb-2 opacity-60 italic">{'>>'} Outbound Result</span>
+                                            <pre className="text-gray-400 text-[10px] whitespace-pre-wrap overflow-x-hidden">
+                                                {JSON.stringify(log.output_data, null, 2).substring(0, 500)}
+                                            </pre>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
                 ))}
 
                 {logs.length === 0 && !loading && (
-                    <div className="text-center py-8 text-gray-500">
-                        No agent activity yet. Waiting for scan to start...
+                    <div className="text-center py-20">
+                        <div className="h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
+                            <Terminal className="h-8 w-8 text-gray-700" />
+                        </div>
+                        <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.3em]">Listening for Neural Uplink...</p>
+                        <p className="text-gray-600 text-[9px] mt-2 italic">Scanning secure frequencies for agent activity</p>
                     </div>
                 )}
 
                 <div ref={logsEndRef} />
+            </div>
+
+            {/* Footer / Console Status */}
+            <div className="px-6 py-2 bg-black/40 border-t border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-4 text-[9px] font-mono text-gray-600">
+                    <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-cyber-accent"></div> LINK ESTABLISHED</span>
+                    <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-cyber-vibrant"></div> ENCRYPTION: AES-256</span>
+                </div>
+                <div className="text-[9px] font-mono text-cyber-neon/40 uppercase font-bold tracking-widest">
+                    AI AGENT MONITOR V1.2.0-PRO
+                </div>
             </div>
         </div>
     );

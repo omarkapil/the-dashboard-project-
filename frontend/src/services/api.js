@@ -51,7 +51,10 @@ export const targetService = {
 };
 
 export const pentesterService = {
-    // Start an AI-powered scan (full PentesterFlow workflow)
+    /**
+     * found 404 API Service
+     * Handles all communication with the backend
+     */
     startAIScan: (targetId, config = {}) => api.post('/scans/ai', {
         target_id: targetId,
         scan_type: 'full',

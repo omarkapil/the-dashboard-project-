@@ -1,6 +1,6 @@
 # 🔌 REST API Documentation
 
-PentesterFlow provides a fully documented REST API for integration with CI/CD pipelines and external dashboards.
+found 404 provides a fully documented REST API for integration with CI/CD pipelines and external dashboards.
 
 ## 🔑 Authentication
 Currently, the API is open for internal network use. Standard Bearer Token authentication is planned for Phase 2.

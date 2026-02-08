@@ -80,6 +80,54 @@ const AssetDetailPanel = ({ node, onClose }) => {
                     </div>
                 </section>
 
+                {/* AI Intelligence Section */}
+                {details.ai_insight && (
+                    <section className="animate-fade-in">
+                        <h3 className="text-[10px] font-black text-cyber-neon uppercase mb-4 flex items-center gap-2 tracking-[0.2em]">
+                            <Shield className="w-3 h-3" /> Intelligence Analysis
+                        </h3>
+                        <div className="bg-cyber-accent/5 border border-cyber-accent/20 rounded-xl p-5 relative group overflow-hidden">
+                            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+                                <Shield className="w-12 h-12 text-cyber-accent" />
+                            </div>
+
+                            <div className="space-y-4 relative z-10">
+                                <div>
+                                    <span className="text-[9px] font-black text-cyber-accent/60 uppercase block mb-1">Device Role</span>
+                                    <p className="text-gray-200 text-xs font-bold leading-relaxed">
+                                        {details.ai_insight.role_analysis}
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="bg-black/40 p-3 rounded-lg border border-white/5">
+                                        <span className="text-[9px] font-black text-cyber-danger uppercase block mb-1">Exposure Synthesis</span>
+                                        <p className="text-gray-400 text-[11px] leading-relaxed italic">
+                                            "{details.ai_insight.risk_synthesis}"
+                                        </p>
+                                    </div>
+                                    <div className="bg-black/40 p-4 rounded-lg border-l-2 border-l-cyber-vibrant">
+                                        <span className="text-[9px] font-black text-cyber-vibrant uppercase block mb-2">Lateral Movement Risk</span>
+                                        <p className="text-gray-300 text-[11px] leading-relaxed font-medium">
+                                            {details.ai_insight.lateral_movement_risk}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="pt-2">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-cyber-success shadow-neon-sm"></div>
+                                        <span className="text-[9px] font-black text-cyber-success uppercase tracking-widest">Recommended Action</span>
+                                    </div>
+                                    <p className="text-white text-xs font-medium bg-cyber-success/10 p-3 rounded-lg border border-cyber-success/20">
+                                        {details.ai_insight.security_tip}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                )}
+
                 {/* 2. Services Section */}
                 <section>
                     <h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center gap-2">

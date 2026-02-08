@@ -1,5 +1,5 @@
 """
-PentesterFlow Database Models
+found 404 Database Models
 Extended models for AI-driven DAST platform
 """
 from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey, Text, Boolean, JSON
@@ -73,7 +73,7 @@ class Target(Base):
 class Scan(Base):
     """
     Represents a security scan session.
-    Updated to match PentesterFlow spec.
+    Updated for found 404.
     """
     __tablename__ = "scans"
 
@@ -129,7 +129,7 @@ class Scan(Base):
 class Vulnerability(Base):
     """
     Stores discovered vulnerabilities with AI validation.
-    Updated to match PentesterFlow spec.
+    Updated for found 404.
     """
     __tablename__ = "vulnerabilities"
 
@@ -175,7 +175,7 @@ class Vulnerability(Base):
 class AgentLog(Base):
     """
     Logs AI agent actions and reasoning for transparency.
-    New table per PentesterFlow spec.
+    New table for found 404.
     """
     __tablename__ = "agent_logs"
 
@@ -200,7 +200,7 @@ class AgentLog(Base):
 class Endpoint(Base):
     """
     Discovered API endpoints for a target.
-    New table per PentesterFlow spec.
+    New table for found 404.
     """
     __tablename__ = "endpoints"
 
@@ -247,6 +247,9 @@ class ScanAsset(Base):
     
     first_seen = Column(DateTime, default=datetime.utcnow)
     last_seen = Column(DateTime, default=datetime.utcnow)
+    
+    # Advanced Intelligence
+    ai_insight = Column(JSON, nullable=True) # Gemini-powered device reasoning
     
     scan = relationship("Scan", back_populates="assets")
     services = relationship("AssetService", back_populates="asset", cascade="all, delete-orphan")

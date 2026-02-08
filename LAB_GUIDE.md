@@ -1,6 +1,6 @@
 # 🧪 Virtual Lab Guide (5-Node Simulation)
 
-PentesterFlow includes a rich **Simulated Corporate Network** to help you test the scanner's capabilities (Asset Discovery, OS Detection, Vulnerability Finding).
+found 404 includes a rich **Simulated Corporate Network** to help you test the scanner's capabilities (Asset Discovery, OS Detection, Vulnerability Finding).
 
 ## 🏗️ Topology Overview
 The lab creates a virtual subnet with 5 unique devices:

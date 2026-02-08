@@ -1,6 +1,6 @@
 # 🔮 Future Work & Roadmap
 
-PentesterFlow is designed for continuous evolution. Below are the planned features and research areas for the upcoming versions.
+**found 404** is designed for continuous evolution. Below are the planned features and research areas for the upcoming versions.
 
 ## 🚀 Phase 1: Core Intelligence (Next 3 Months)
 - **Visual Pentesting**: Use Google Gemini Vision to "look" at screenshots and find UI-level vulnerabilities (e.g., exposed credentials in cleartext).

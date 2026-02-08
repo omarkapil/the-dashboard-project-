@@ -19,8 +19,16 @@ const NetworkTopology = ({ refresh }) => {
             setLoading(true);
             const { data: scans } = await scanService.getScans();
             if (scans.length > 0) {
-                const latest = scans.sort((a, b) => b.id - a.id)[0];
-                const { data: details } = await scanService.getScanDetails(latest.id);
+                const sortedScans = scans.sort((a, b) => new Date(b.started_at) - new Date(a.started_at));
+
+                // Try to find the latest scan that actually has assets
+                // This ensures the "Neural Network" doesn't look empty if a recent scan found nothing
+                let targetScan = sortedScans.find(s => s.assets_count > 0);
+
+                // Fallback to absolute latest if none have assets
+                if (!targetScan) targetScan = sortedScans[0];
+
+                const { data: details } = await scanService.getScanDetails(targetScan.id);
                 transformDataToGraph(details);
             }
         } catch (error) {
@@ -37,7 +45,7 @@ const NetworkTopology = ({ refresh }) => {
         // Add Central Hub (The Scanner/Gateway)
         nodes.push({
             id: 'hub',
-            name: 'PentesterFlow Hub',
+            name: 'found 404 Hub',
             group: 'gateway',
             val: 20
         });
@@ -87,113 +95,183 @@ const NetworkTopology = ({ refresh }) => {
     };
 
     const getNodeColor = (node) => {
-        if (node.id === 'hub') return '#06b6d4'; // Cyan
-        if (node.vulnCount > 0) return '#ef4444'; // Red
-        return '#22c55e'; // Green
+        if (node.id === 'hub') return '#38bdf8'; // cyber-accent
+        if (node.vulnCount > 0) return '#ef4444'; // cyber-danger
+        return '#10b981'; // cyber-success
     };
 
     const handleNodeClick = useCallback(node => {
         setSelectedNode(node);
-        // Aim at node from outside it
         const distance = 40;
         const distRatio = 1 + distance / Math.hypot(node.x, node.y);
 
         fgRef.current.centerAt(
             node.x * distRatio,
             node.y * distRatio,
-            1000 // Transition ms
+            1200 // Smoother transition
         );
-        fgRef.current.zoom(3, 2000);
+        fgRef.current.zoom(3.5, 2000);
     }, [fgRef]);
 
     if (loading) return (
-        <div className="flex justify-center items-center h-96 bg-gray-900 rounded-xl border border-gray-700">
-            <Loader className="h-8 w-8 text-cyan-400 animate-spin" />
+        <div className="flex flex-col justify-center items-center h-[600px] glass-card border-dashed">
+            <Loader className="h-10 w-10 text-cyber-neon animate-spin mb-4" />
+            <span className="text-[10px] font-black text-cyber-neon/60 animate-pulse tracking-[0.3em] uppercase">Mapping Neural Network...</span>
         </div>
     );
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in relative z-10">
             {/* Graph Container */}
-            <div className="lg:col-span-2 bg-gray-900 rounded-xl border border-gray-700 overflow-hidden relative" style={{ height: '600px' }}>
-                <div className="absolute top-4 left-4 z-10 flex gap-2">
-                    <div className="bg-gray-800/80 p-2 rounded-lg text-xs text-gray-300 backdrop-blur-sm border border-gray-700">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="w-2 h-2 rounded-full bg-cyan-500"></span> Gateway
-                        </div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="w-2 h-2 rounded-full bg-green-500"></span> Secure
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-red-500"></span> Vulnerable
+            <div className="lg:col-span-2 glass-card border-white/5 overflow-hidden relative" style={{ height: '600px' }}>
+                <div className="absolute top-6 left-6 z-20">
+                    <div className="px-4 py-3 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-glass">
+                        <div className="flex flex-col gap-2.5">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-cyber-accent shadow-[0_0_8px_rgba(56,189,248,0.8)]"></div>
+                                <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Gateway Hub</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-cyber-success shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                                <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Operational</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-cyber-danger shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse"></div>
+                                <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Infected</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
-                    <button onClick={() => fgRef.current.zoomToFit(400)} className="p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg border border-gray-600">
-                        <ZoomOut className="h-4 w-4" />
+                <div className="absolute top-6 right-6 z-20 flex flex-col gap-3">
+                    <button
+                        onClick={() => fgRef.current.zoomToFit(400)}
+                        className="p-3 bg-black/60 backdrop-blur-md hover:bg-white/10 text-white rounded-xl border border-white/10 transition-all hover:shadow-neon"
+                        title="Zoom to Fit"
+                    >
+                        <ZoomOut className="h-4 w-4 text-cyber-neon" />
                     </button>
-                    <button onClick={fetchData} className="p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg border border-gray-600">
-                        <RefreshCw className="h-4 w-4" />
+                    <button
+                        onClick={fetchData}
+                        className="p-3 bg-black/60 backdrop-blur-md hover:bg-white/10 text-white rounded-xl border border-white/10 transition-all hover:shadow-neon"
+                        title="Refresh Stream"
+                    >
+                        <RefreshCw className="h-4 w-4 text-cyber-neon" />
                     </button>
                 </div>
 
                 <ForceGraph2D
                     ref={fgRef}
                     graphData={graphData}
-                    nodeLabel="name"
+                    nodeLabel={(node) => `
+                        <div class="p-2 bg-black/80 border border-white/10 rounded-lg backdrop-blur-md">
+                            <div class="text-[10px] font-black text-cyber-neon mb-1 uppercase tracking-tighter">${node.name}</div>
+                            <div class="text-[8px] text-gray-400 font-mono">${node.ip || 'INTERNAL HUB'}</div>
+                        </div>
+                    `}
                     nodeColor={getNodeColor}
-                    nodeRelSize={6}
-                    linkColor={() => '#374151'} // gray-700
-                    backgroundColor="#111827" // gray-900
+                    nodeRelSize={7}
+                    linkColor={() => 'rgba(56, 189, 248, 0.1)'}
+                    linkWidth={1}
+                    linkDirectionalParticles={2}
+                    linkDirectionalParticleSpeed={0.005}
+                    backgroundColor="#020617"
                     onNodeClick={handleNodeClick}
+                    d3VelocityDecay={0.3}
                     nodeCanvasObject={(node, ctx, globalScale) => {
+                        // SAFETY CHECK: Don't render if positions aren't set yet (prevents blank screen crash)
+                        if (node.x === undefined || node.y === undefined) return;
+
                         const label = node.name;
-                        const fontSize = 12 / globalScale;
-                        ctx.font = `${fontSize}px Sans-Serif`;
-                        const textWidth = ctx.measureText(label).width;
-                        const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
+                        const fontSize = 10 / globalScale;
+                        const nodeColor = getNodeColor(node);
+                        const size = node.val * 0.8;
 
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Shadow
+                        // 1. Draw Outer Hexagonal Frame
                         ctx.beginPath();
-                        ctx.arc(node.x, node.y, node.val, 0, 2 * Math.PI, false);
-                        ctx.fill();
+                        for (let i = 0; i < 6; i++) {
+                            const angle = (i * Math.PI) / 3;
+                            const x = node.x + (size * 1.2) * Math.cos(angle);
+                            const y = node.y + (size * 1.2) * Math.sin(angle);
+                            if (i === 0) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                        }
+                        ctx.closePath();
+                        ctx.strokeStyle = `${nodeColor}44`;
+                        ctx.lineWidth = 2 / globalScale;
+                        ctx.stroke();
 
-                        ctx.fillStyle = getNodeColor(node);
+                        // 2. Animated Scanning Ring (Simulated with time)
+                        const t = Date.now() / 1000;
+                        const pulsate = Math.sin(t * 3) * 0.2 + 1;
                         ctx.beginPath();
-                        ctx.arc(node.x, node.y, node.val * 0.8, 0, 2 * Math.PI, false);
-                        ctx.fill();
+                        ctx.arc(node.x, node.y, size * (1.1 + pulsate * 0.1), 0, 2 * Math.PI);
+                        ctx.strokeStyle = `${nodeColor}22`;
+                        ctx.stroke();
 
-                        // Only draw text if focused
-                        if (globalScale > 1.5 || selectedNode?.id === node.id) {
+                        // 3. Node Core (Gradient)
+                        const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, size);
+                        gradient.addColorStop(0, nodeColor);
+                        gradient.addColorStop(1, `${nodeColor}66`);
+
+                        ctx.fillStyle = gradient;
+                        ctx.shadowColor = nodeColor;
+                        ctx.shadowBlur = 10 / globalScale;
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        // 4. Inner Detail (Small crosshair or symbol)
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                        ctx.lineWidth = 1 / globalScale;
+                        ctx.beginPath();
+                        ctx.moveTo(node.x - size / 3, node.y); ctx.lineTo(node.x + size / 3, node.y);
+                        ctx.moveTo(node.x, node.y - size / 3); ctx.lineTo(node.x, node.y + size / 3);
+                        ctx.stroke();
+
+                        // 5. Label Rendering
+                        if (globalScale > 2 || selectedNode?.id === node.id) {
+                            ctx.font = `bold ${fontSize}px "Outfit", sans-serif`;
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
+
+                            const textY = node.y + size + (fontSize * 1.5);
+
+                            // Futuristic Label Background
+                            const textWidth = ctx.measureText(label).width;
+                            ctx.fillStyle = 'rgba(2, 6, 23, 0.8)';
+                            ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+                            ctx.beginPath();
+                            ctx.roundRect(node.x - textWidth / 2 - 6, textY - fontSize, textWidth + 12, fontSize * 2, 4);
+                            ctx.fill();
+                            ctx.stroke();
+
                             ctx.fillStyle = '#fff';
-                            ctx.fillText(label, node.x, node.y + node.val + 2);
+                            ctx.fillText(label, node.x, textY);
                         }
                     }}
                 />
             </div>
 
-            {/* Details Panel - Floating or Grid Column */}
-            <div className={`transition-all duration-300 ${selectedNode && selectedNode.id !== 'hub' ? 'col-span-1 opacity-100' : 'hidden lg:block lg:col-span-1 lg:opacity-50 pointer-events-none'}`}>
+            {/* Details Panel */}
+            <div className={`transition-all duration-500 ${selectedNode && selectedNode.id !== 'hub' ? 'col-span-1 opacity-100 translate-x-0' : 'hidden lg:block lg:col-span-1 lg:opacity-20 translate-x-4 pointer-events-none'}`}>
                 {selectedNode && selectedNode.id !== 'hub' ? (
                     <AssetDetailPanel
                         node={selectedNode}
                         onClose={() => {
                             setSelectedNode(null);
-                            fgRef.current.zoomToFit(400);
+                            fgRef.current.zoomToFit(600);
                         }}
                     />
                 ) : (
-                    <div className="h-full bg-gray-900/50 border border-gray-800 rounded-xl flex flex-col justify-center items-center text-center p-8 border-dashed">
-                        <div className="bg-gray-800 p-4 rounded-full mb-4 opacity-50">
-                            <Move className="h-8 w-8 text-cyan-400" />
+                    <div className="h-full glass-card border-dashed border-white/5 flex flex-col justify-center items-center text-center p-10 group/empty">
+                        <div className="p-6 bg-white/5 rounded-full mb-6 group-hover/empty:scale-110 transition-transform duration-500">
+                            <Move className="h-10 w-10 text-cyber-neon/40 group-hover/empty:text-cyber-neon transition-colors" />
                         </div>
-                        <h3 className="text-gray-400 font-bold text-lg mb-2">Interactive Topology</h3>
-                        <p className="text-gray-600 text-sm max-w-xs">
-                            Click on any node in the network graph to view deep inspection details like OS version, open ports, and vulnerabilities.
+                        <h3 className="text-white font-black text-xl mb-4 tracking-tighter uppercase">Infrastructure Insight</h3>
+                        <p className="text-gray-500 text-sm leading-relaxed max-w-xs font-medium">
+                            Synthesizing network topology... Click any <span className="text-cyber-neon">Node</span> to initiate high-resolution deep packet inspection.
                         </p>
                     </div>
                 )}

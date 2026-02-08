@@ -1,6 +1,6 @@
-# PentesterFlow: Architecture Deep Dive
+# found 404: Architecture Deep Dive
 
-This document explains the internal structure of the PentesterFlow platform, the role of each file, and how they connect to form a cohesive AI-driven security testing system.
+This document explains the internal structure of the **found 404** platform, the role of each file, and how they connect to form a cohesive AI-driven security testing system.
 
 ---
 
@@ -22,7 +22,7 @@ graph TD
     subgraph "Security Suite"
         Worker --> Nmap[Nmap Wrapper]
         Worker --> Nuclei[Nuclei Scanner]
-        Worker --> AI[Gemini AI Agent]
+        Worker --> AI[Intelligence Agent]
     end
 
     Nmap -->|Discovery Data| DB
@@ -50,10 +50,10 @@ The backend is built with **FastAPI** and follows a modular service-oriented arc
 
 ### ⚙️ Services (The Engines)
 These files contain the logic for interacting with external tools and AI:
-- **`app/services/agent_orchestrator.py`**: The "General" of the AI agents. It decides which agent to run next based on scan progress.
+- **`app/services/intelligence_agent.py`**: The "Intelligence Core". It classifies assets and synthesizes risk insights using Gemini.
 - **`app/services/nmap_wrapper.py`**: Executes Nmap commands for discovery and parses the XML results into the database.
 - **`app/services/nuclei_wrapper.py`**: Manages Nuclei scans for targeted vulnerability testing.
-- **`app/services/ai_advisor.py`**: Interfaces with Google Gemini to provide remediation advice and explain vulnerabilities.
+- **`app/services/intelligence_agent.py`**: Interfaces with Google Gemini to provide remediation advice and explain vulnerabilities.
 - **`app/services/risk_engine.py`**: Calculates the overall risk score (0-100) based on vulnerability severity and asset importance.
 - **`app/services/scan_tasks.py`**: Contains the actual Celery tasks that run Nmap, Nuclei, and AI analysis in the background.
 

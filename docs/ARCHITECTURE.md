@@ -1,6 +1,6 @@
-# 🏗️ PentesterFlow Architecture
+# 🏗️ found 404 Architecture
 
-PentesterFlow is built on a modern, distributed architecture designed for low-latency scanning and high-intelligence reasoning.
+found 404 is built on a modern, distributed architecture designed for low-latency scanning and high-intelligence reasoning.
 
 ## 📡 System Overview
 
@@ -28,7 +28,7 @@ The `AgentOrchestrator` manages the multi-agent state machine. It ensures that r
 - **Payload Engine**: Generates context-aware security payloads for SQL injection, XSS, and BOLA.
 
 ### 3. Intelligence Layer (The "Knowledge")
-- **AI Advisor**: A dedicated service that interacts with Google Gemini 1.5 Flash to provide human-readable executive summaries and remediation advice.
+- **Intelligence Agent**: A dedicated service that interacts with Gemini Pro to provide human-readable executive summaries and remediation advice.
 - **Validation Agent**: Operates as a noise filter, analyzing raw scanner output to confirm if a finding is truly exploitable.
 
 ### 4. Data Layer

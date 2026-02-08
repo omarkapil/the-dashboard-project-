@@ -35,10 +35,15 @@ def run_scan_task(self, scan_id: int):
         if not target_host:
             raise ValueError(f"No valid target URL found for scan {scan.id}")
         
-        # SANITIZE TARGET FOR NMAP (Strip protocol, path, port)
-        from urllib.parse import urlparse
-        parsed = urlparse(target_host)
-        clean_target = parsed.hostname or parsed.path.split('/')[0] # Handles 'localhost:3000' or 'http://localhost'
+        # SANITIZE TARGET FOR NMAP (Strip protocol, path, port while preserving CIDR)
+        clean_target = target_host
+        if "://" in target_host:
+            from urllib.parse import urlparse
+            parsed = urlparse(target_host)
+            clean_target = parsed.hostname or parsed.path.split('/')[0]
+        elif "/" in target_host and not target_host.startswith("/"):
+            # Likely CIDR notation like 192.168.1.0/24
+            clean_target = target_host
             
         results = scanner.scan_target(clean_target, scan.scan_type)
         
@@ -87,14 +92,14 @@ def run_scan_task(self, scan_id: int):
                     db.add(service)
 
                     # Add to Vulnerabilities table (Active Risks)
-                    # We still create these so the Risk Engine works
                     vuln = Vulnerability(
                         scan_id=scan.id,
                         host=host_data['ip'],
                         port=port_data['port'],
                         protocol=port_data['protocol'],
                         service=port_data['service'],
-                        severity=port_data['severity'],
+                        type="Service Exposure",
+                        severity=port_data['severity'].lower(),
                         url=f"{port_data['protocol']}://{host_data['ip']}:{port_data['port']}",
                         description=f"Service: {port_data['product']} {port_data['version']}",
                         remediation="Update service or firewall port."
@@ -106,11 +111,20 @@ def run_scan_task(self, scan_id: int):
                     # Collect for Risk Engine
                     all_vulns.append({
                         "host": host_data['ip'],
-                        "severity": port_data['severity'],
+                        "severity": port_data['severity'].lower(),
                         "cve_id": "",
                         "description": f"Service: {port_data['product']}"
                     })
-        
+
+        # Phase 1.5: Intelligence Analysis (Gemini)
+        # Import inside task to avoid circular deps
+        try:
+            from app.services.intelligence_agent import IntelligenceAgent
+            intelligence = IntelligenceAgent(db)
+            intelligence.batch_analyze(scan.id, results)
+        except Exception as e:
+            logger.error(f"Intelligence analysis failed: {e}")
+
         # 3. Deep Vulnerability Scan (Nuclei)
         try:
             from app.services.nuclei_wrapper import NucleiWrapper
@@ -126,8 +140,8 @@ def run_scan_task(self, scan_id: int):
                     url=finding['url'],
                     host=clean_target,
                     service="http" if "http" in finding['url'] else "unknown", # Deduce service
-                    cve_id=finding['cve_id'],
-                    proof_of_concept=str(finding['evidence']),
+                    cve_id=finding.get('cve_id', ''), # Use .get for safety
+                    proof_of_concept=str(finding.get('evidence', '')), # Use .get for safety
                     remediation="Refer to CVE mitigation.",
                     status="OPEN"
                 )
@@ -136,7 +150,7 @@ def run_scan_task(self, scan_id: int):
                 all_vulns.append({
                     "host": clean_target,
                     "severity": finding['severity'],
-                    "cve_id": finding['cve_id'],
+                    "cve_id": finding.get('cve_id', ''), # Use .get for safety
                     "description": finding['description']
                 })
                 

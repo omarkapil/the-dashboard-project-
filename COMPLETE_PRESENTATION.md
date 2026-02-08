@@ -1,4 +1,4 @@
-# 🛡️ PentesterFlow: The Complete Project Guide
+# 🛡️ found 404: The Intelligence Security Hub
 **AI-Driven Security Testing for the Modern Network**
 
 ---
@@ -15,8 +15,8 @@
 ---
 
 ### 🚀 Slide 2: The Solution
-**Meet PentesterFlow**
-PentesterFlow isn't just a scanner; it's an **AI-Powered Security Agent**.
+**Meet found 404**
+found 404 isn't just a scanner; it's a **Neural Security Hub**.
 *   **Autonomous**: It thinks like a hacker to find weaknesses.
 *   **Smart**: Uses Google Gemini AI to filter out "fake" alerts.
 *   **Visual**: Shows you your entire network as a digital map.
@@ -70,7 +70,7 @@ PentesterFlow comes with a **Simulated Corporate Network**.
 ---
 
 ### 🏁 Slide 8: Summary
-**Why PentesterFlow?**
+**Why found 404?**
 1.  **Visibility**: See your network.
 2.  **Intelligence**: Understand your risks.
 3.  **Simplicity**: Act without needing a PhD in Security.
@@ -80,10 +80,10 @@ PentesterFlow comes with a **Simulated Corporate Network**.
 ## 🔍 PART 2: Deep Dive (Q&A Overview)
 
 ### 🎯 General Goals & Vision
-**Q: What is PentesterFlow?**  
+**Q: What is found 404?**  
 **A:** PentesterFlow is a professional-grade **Agentic Dynamic Application Security Testing (DAST)** platform. It is designed to act as an autonomous security researcher that doesn't just scan for bugs but "understands" the context of the applications it tests.
 
-**Q: Why was PentesterFlow created?**  
+**Q: Why was found 404 created?**  
 **A:** Traditional security scanners often produce a lot of "noise" (false positives) and lack the context to understand complex application flows. PentesterFlow was created to bridge this gap by using **AI Agents** that can reason about vulnerabilities, validate findings, and provide actionable security intelligence.
 
 ---
@@ -121,7 +121,7 @@ PentesterFlow comes with a **Simulated Corporate Network**.
 ---
 
 ### 🔮 The Future
-**Q: What's next for PentesterFlow?**  
+**Q: What's next for found 404?**  
 **A:** The roadmap includes:
 - **Vision Integration**: Using AI to "see" screenshots of web pages.
 - **Enterprise Features**: Role-Based Access Control (RBAC).

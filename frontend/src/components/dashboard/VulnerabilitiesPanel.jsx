@@ -90,8 +90,9 @@ const VulnerabilitiesPanel = ({ scanId = null, refresh = 0 }) => {
 
     if (loading) {
         return (
-            <div className="bg-cyber-light p-8 rounded-xl border border-gray-700 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 text-cyan-400 animate-spin" />
+            <div className="glass-card p-12 flex flex-col items-center justify-center gap-4">
+                <Loader2 className="h-10 w-10 text-cyber-neon animate-spin" />
+                <span className="text-[10px] font-black text-cyber-neon/60 animate-pulse tracking-[0.3em] uppercase">Decrypting Vulnerability Data...</span>
             </div>
         );
     }
@@ -131,8 +132,10 @@ const VulnerabilitiesPanel = ({ scanId = null, refresh = 0 }) => {
                 {vulnerabilities.map((vuln) => (
                     <div
                         key={vuln.id}
-                        className="bg-cyber-light p-4 rounded-xl border border-gray-700 hover:border-gray-600 transition-all"
+                        className="glass-card-interactive p-5 relative group"
                     >
+                        {/* Status Accent Line */}
+                        <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl ${vuln.severity === 'critical' ? 'bg-cyber-danger shadow-[2px_0_10px_rgba(239,68,68,0.4)]' : 'bg-transparent'}`}></div>
                         <div className="flex items-start gap-4">
                             {/* Severity Badge */}
                             <div className={`px-3 py-1 rounded-full text-xs font-semibold border ${getSeverityColor(vuln.severity)}`}>
@@ -156,15 +159,15 @@ const VulnerabilitiesPanel = ({ scanId = null, refresh = 0 }) => {
                                     </p>
                                 )}
                                 {vuln.confidence_score && (
-                                    <div className="mt-2 flex items-center gap-2">
-                                        <span className="text-gray-500 text-xs">Confidence:</span>
-                                        <div className="w-24 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    <div className="mt-3 flex items-center gap-3">
+                                        <span className="text-gray-500 text-[9px] font-black uppercase tracking-widest">Confidence Index</span>
+                                        <div className="flex-1 max-w-[120px] h-1 bg-white/5 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-gradient-to-r from-cyan-500 to-purple-500"
+                                                className="h-full bg-gradient-to-r from-cyber-neon to-cyber-vibrant shadow-[0_0_8px_rgba(34,211,238,0.5)]"
                                                 style={{ width: `${vuln.confidence_score * 100}%` }}
                                             />
                                         </div>
-                                        <span className="text-gray-400 text-xs">
+                                        <span className="text-cyber-neon text-[10px] font-mono font-bold">
                                             {(vuln.confidence_score * 100).toFixed(0)}%
                                         </span>
                                     </div>

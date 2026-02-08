@@ -94,7 +94,7 @@ class ScanResponse(ScanSummary):
     target_id: Optional[str] = None
     target_url: Optional[str] = None
     configuration: Optional[Dict[str, Any]] = None
-    started_at: datetime
+    started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
 
     class Config:
@@ -241,6 +241,7 @@ class ScanAssetResponse(BaseModel):
     device_type: str = "unknown"
     uptime: Optional[str] = None
     is_new: Optional[str] = "false"
+    ai_insight: Optional[Dict[str, Any]] = None
     
     # Nested Services
     services: List[AssetServiceResponse] = []

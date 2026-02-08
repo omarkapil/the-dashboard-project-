@@ -1,24 +1,24 @@
-# PentesterFlow - AI-Driven DAST Platform
+# found 404 // Intelligence-Driven Security Hub
 
-![PentesterFlow Dashboard](https://via.placeholder.com/1200x600?text=PentesterFlow+AI+DAST+Command+Center)
+![found 404 Dashboard](https://via.placeholder.com/1200x600?text=found+404+Core+Node+Command+Center)
 
 ## 🌟 Overview
-**PentesterFlow** is a professional-grade agentic dynamic application security testing (DAST) platform. It leverages autonomous AI agents to intelligently discover, test, and validate vulnerabilities in web applications and infrastructure. Unlike traditional scanners, PentesterFlow uses contextual reasoning and LLM-backed validation to minimize noise and provide actionable security intelligence.
+**found 404** is a high-intelligence agentic security platform designed for deep infrastructure discovery and vulnerability analysis. It leverages autonomous AI agents to intelligently map, test, and synthesize security insights for corporate networks. Using **Gemini-backed reasoning** and **Neural Topology** visualization, found 404 provides a state-of-the-art DAST experience that goes beyond simple signatures to provide true operational intelligence.
 
 ---
 
 ## 🚀 Key Features
 
-### 1. Advanced Asset Discovery & Topology
-- **Deep Network Scanning**: Integrates **Nmap** with OS detection (`-O`) and Aggressive Service Scan (`-A`).
-- **Visual Topology**: Interactive 2D graph visualization of network assets (Gateways, Servers, Workstations).
-- **Device Fingerprinting**: Automatically identifies OS (Windows/Linux/Cisco) and Device Type (Mobile/Server/Router) using heuristic analysis.
+### 1. Neural Network Topology
+- **Interactive Hex-Graph**: A custom-engineered D3-powered force graph with neon status rings and interactive nodes.
+- **Deep CIDR Discovery**: Correctly parses and maps entire subnets (e.g., `/24`), identifying and classifying every device in the infrastructure.
+- **Smart Data Recovery**: Automatically prioritizes the most feature-rich scan results for a consistent "Neural Network" view.
 
-### 2. Autonomous AI Agent Workflow
-- **Recon Agent**: Automatically maps application structure and identifies hidden ports and services.
-- **Attack Agent**: Generates context-aware payloads (SQLi, XSS, BOLA).
-- **Vulnerability Engine**: Now powered by **Nuclei** for deep, template-based vulnerability scanning (CVEs, Misconfigurations).
-- **Validation Agent**: Uses Google Gemini (1.5-Flash) to filter false positives.
+### 2. Autonomous AI Intelligence Agent
+- **Asset Synthesis**: Uses **Gemini Pro** to transform raw Nmap data into human-readable device roles (e.g., "Critical HR Database").
+- **Risk Path Projection**: Predicts potential lateral movement risks based on discovered service exposures.
+- **Nuclei Integration**: Powered by an automated **Nuclei** worker with intelligent template discovery (`-as`) for high-fidelity CVE detection.
+- **Validation Engine**: Performs real-time reasoning to filter false positives and provide actionable remediation tips.
 
 ### 3. Professional Security Dashboard
 - **Asset Detail Panel**: Rich slide-out panel showing MAC Vendor, Uptime, and detailed Service Versions per asset.
@@ -94,4 +94,4 @@ Go to [http://localhost:5173](http://localhost:5173).
 
 ---
 
-**PentesterFlow** — *AI-Native Asset Discovery & Security Testing.*
+**found 404** — *Neural Asset Discovery & Intelligence Hub.*
