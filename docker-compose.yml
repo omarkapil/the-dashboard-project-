@@ -6,10 +6,18 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./backend:/app
+      # - gvm_socket:/run/gvmd
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/sme_cyber_db
       - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://user:password@db:5432/sme_cyber_db
+      - REDIS_URL=redis://redis:6379/0
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENVAS_HOST=openvas
+      - OPENVAS_PORT=9390
+      - OPENVAS_CONNECTION_TYPE=tls # immauss/openvas uses TLS on 9390
+      # - OPENVAS_SOCKET=/run/gvmd/gvmd.sock
     networks:
       - default
       - lab_network
@@ -75,6 +83,20 @@ services:
       - backend
       - redis
 
+  openvas:
+    image: immauss/openvas
+    container_name: sme_dashboard_openvas
+    environment:
+      - PUBLIC_HOSTNAME=127.0.0.1
+    ports:
+      - "9392:9392" # Web UI
+      - "9390:9390" # GMP
+    volumes:
+      - gvm_data:/var/lib/openvas
+    networks:
+      - default
+      - lab_network
+
 networks:
   default:
   lab_network:
@@ -83,3 +105,6 @@ networks:
 
 volumes:
   postgres_data:
+  gvm_data:
+
+

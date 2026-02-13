@@ -106,4 +106,17 @@ export const vulnerabilityService = {
     markFixed: (id) => api.patch(`/vulnerabilities/${id}`, { status: 'fixed' }),
 };
 
+export const openvasService = {
+    startQuickScan: (targetIp, targetName) => api.post('/openvas/scan/quick', { target_ip: targetIp, target_name: targetName }),
+    getScanStatus: (taskId) => api.get(`/openvas/status/${taskId}`),
+    getScanResults: (taskId) => api.get(`/openvas/results/${taskId}`),
+    scheduleScan: (data) => api.post('/openvas/schedule', data),
+};
+
+export const dashboardService = {
+    getRiskOverview: () => api.get('/dashboard/risk-overview'),
+    getActionItems: () => api.get('/dashboard/actions'),
+    refreshRiskScores: () => api.post('/dashboard/refresh-risk'),
+};
+
 export default api;

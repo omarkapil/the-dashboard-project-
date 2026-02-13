@@ -42,6 +42,20 @@ Example Output: `172.18.0.2/16`. This means your target range is **`172.18.0.0/2
     - **Redis**: "Unauthenticated Redis Server"
     - **SMB**: "Samba Server Detected"
     - **RDP**: "Remote Desktop Protocol"
+    - **OpenVAS Results**: Detailed vulnerability reports (e.g. "Check for Default Credentials", "Redis Unprotected").
+
+## 🛡️ Verifying OpenVAS Integration (New)
+1.  **Check Connection**: Ensure the `gvmd` socket is accessible.
+    - If running in Docker, ensure `gvmd` volume is mounted to `/run/gvmd`.
+    - Or verify TLS connection settings in `.env`.
+2.  **Run One-Click Scan**:
+    - Go to the **Scanner** tab.
+    - Click **One-Click Scan**.
+    - Enter `172.18.0.0/24` (or your lab subnet).
+    - Watch for "Scan Started" notification.
+3.  **View Results**:
+    - The "Risk Summary" chart should update as findings come in.
+    - The "Scan Results" list will populate with simplified AI-driven explanations.
 
 ## 🧹 Cleanup
 To stop and remove the lab environment:

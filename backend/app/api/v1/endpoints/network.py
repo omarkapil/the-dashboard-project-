@@ -22,6 +22,8 @@ class NetworkAssetResponse(BaseModel):
     first_seen: datetime
     last_seen: datetime
     open_ports: Optional[str] = None
+    criticality: Optional[str] = "MEDIUM"
+    risk_score: float = 0.0
     
     class Config:
         from_attributes = True

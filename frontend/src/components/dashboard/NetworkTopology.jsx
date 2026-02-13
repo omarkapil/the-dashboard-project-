@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
-import { scanService } from '../../services/api';
+import { networkService } from '../../services/api';
+
 import { Loader, Move, ZoomIn, ZoomOut, RefreshCw, Smartphone, Server, Monitor, Radio, Shield } from 'lucide-react';
 import AssetDetailPanel from './AssetDetailPanel';
 
@@ -17,20 +18,8 @@ const NetworkTopology = ({ refresh }) => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const { data: scans } = await scanService.getScans();
-            if (scans.length > 0) {
-                const sortedScans = scans.sort((a, b) => new Date(b.started_at) - new Date(a.started_at));
-
-                // Try to find the latest scan that actually has assets
-                // This ensures the "Neural Network" doesn't look empty if a recent scan found nothing
-                let targetScan = sortedScans.find(s => s.assets_count > 0);
-
-                // Fallback to absolute latest if none have assets
-                if (!targetScan) targetScan = sortedScans[0];
-
-                const { data: details } = await scanService.getScanDetails(targetScan.id);
-                transformDataToGraph(details);
-            }
+            const { data: assets } = await networkService.getAssets();
+            transformDataToGraph(assets);
         } catch (error) {
             console.error("Failed to fetch topology", error);
         } finally {
@@ -38,7 +27,7 @@ const NetworkTopology = ({ refresh }) => {
         }
     };
 
-    const transformDataToGraph = (data) => {
+    const transformDataToGraph = (assets) => {
         const nodes = [];
         const links = [];
 
@@ -47,25 +36,30 @@ const NetworkTopology = ({ refresh }) => {
             id: 'hub',
             name: 'found 404 Hub',
             group: 'gateway',
-            val: 20
+            val: 20,
+            riskScore: 0
         });
 
-        if (data.assets) {
-            data.assets.forEach(asset => {
-                const vulnCount = data.vulnerabilities?.filter(v => v.host === asset.ip_address).length || 0;
+        if (Array.isArray(assets)) {
+            assets.forEach(asset => {
+                // Determine Vulnerability Count from Risk Score (Reverse engineering for viz)
+                // Default logic if not explicit
+                const estimatedVulns = Math.floor((asset.risk_score || 0) / 10);
 
                 nodes.push({
                     id: asset.id || asset.ip_address,
                     name: asset.hostname || asset.ip_address,
                     ip: asset.ip_address,
                     group: determineGroup(asset),
-                    vulnCount: vulnCount,
-                    status: vulnCount > 0 ? 'compromised' : 'secure',
-                    val: 10 + (vulnCount * 2), // Bigger node if more vulns
+                    vulnCount: estimatedVulns,
+                    status: (asset.risk_score > 50) ? 'critical' : 'secure',
+                    val: 10 + ((asset.risk_score || 0) / 5),
+                    riskScore: asset.risk_score || 0,
+                    criticality: asset.criticality || 'MEDIUM',
                     details: asset
                 });
 
-                // Link to Hub (Star Topology for now, can be mesh if we had traceroute data)
+                // Link to Hub
                 links.push({
                     source: 'hub',
                     target: asset.id || asset.ip_address,
@@ -96,7 +90,10 @@ const NetworkTopology = ({ refresh }) => {
 
     const getNodeColor = (node) => {
         if (node.id === 'hub') return '#38bdf8'; // cyber-accent
-        if (node.vulnCount > 0) return '#ef4444'; // cyber-danger
+        if (node.riskScore >= 80) return '#ef4444'; // CRITICAL - Red
+        if (node.riskScore >= 50) return '#f97316'; // HIGH - Orange
+        if (node.riskScore >= 20) return '#eab308'; // MEDIUM - Yellow
+        if (node.vulnCount > 0) return '#fbbf24'; // LOW - Amber (fallback)
         return '#10b981'; // cyber-success
     };
 
@@ -202,8 +199,10 @@ const NetworkTopology = ({ refresh }) => {
                         ctx.stroke();
 
                         // 2. Animated Scanning Ring (Simulated with time)
+                        // Pulse Speed based on Risk
+                        const pulseSpeed = node.riskScore > 50 ? 5 : 2;
                         const t = Date.now() / 1000;
-                        const pulsate = Math.sin(t * 3) * 0.2 + 1;
+                        const pulsate = Math.sin(t * pulseSpeed) * 0.2 + 1;
                         ctx.beginPath();
                         ctx.arc(node.x, node.y, size * (1.1 + pulsate * 0.1), 0, 2 * Math.PI);
                         ctx.strokeStyle = `${nodeColor}22`;

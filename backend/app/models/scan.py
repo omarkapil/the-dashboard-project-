@@ -165,6 +165,11 @@ class Vulnerability(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Simplified fields for non-technical users
+    title = Column(String(255), nullable=True) # Explicit title (e.g. "Log4j RCE")
+    simplified_description = Column(Text, nullable=True) # AI-generated simple explanation
+    remediation_steps = Column(Text, nullable=True) # Actionable steps
+
     scan = relationship("Scan", back_populates="vulnerabilities")
 
 
@@ -292,6 +297,10 @@ class NetworkAsset(Base):
     first_seen = Column(DateTime, default=datetime.utcnow)
     last_seen = Column(DateTime, default=datetime.utcnow)
     open_ports = Column(String, nullable=True)
+
+    # Risk Engine Fields
+    criticality = Column(Enum("CRITICAL", "HIGH", "MEDIUM", "LOW", name="asset_criticality_enum"), default="MEDIUM")
+    risk_score = Column(Float, default=0.0)
 
 
 class ActionItem(Base):

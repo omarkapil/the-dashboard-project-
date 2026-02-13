@@ -21,3 +21,4 @@ playwright==1.41.0
 aiohttp==3.9.1
 beautifulsoup4==4.12.2
 lxml==5.1.0
+python-gvm==24.1.0

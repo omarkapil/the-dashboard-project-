@@ -11,8 +11,13 @@ import TargetsManager from '../components/dashboard/TargetsManager';
 import VulnerabilitiesPanel from '../components/dashboard/VulnerabilitiesPanel';
 import AgentLogViewer from '../components/dashboard/AgentLogViewer';
 import Tabs from '../components/ui/Tabs';
-import { scanService } from '../services/api';
-import { LayoutDashboard, History, Settings, Activity, Network, FileText, Target, Bug, Brain } from 'lucide-react';
+import { scanService, dashboardService } from '../services/api';
+
+import OpenVasScanButton from '../components/OpenVAS/ScanButton';
+import RiskChart from '../components/OpenVAS/RiskChart';
+import Scheduler from '../components/OpenVAS/Scheduler';
+import VulnerabilitiesList from '../components/OpenVAS/VulnerabilitiesList';
+import { LayoutDashboard, History, Settings, Activity, Network, FileText, Target, Bug, Brain, Scan as ScanIcon } from 'lucide-react';
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
@@ -56,6 +61,9 @@ const Dashboard = () => {
         };
 
         checkScanStatus();
+        // Trigger Risk Analysis to ensure dashboard is fresh
+        dashboardService.refreshRiskScores().catch(console.error);
+
         const initialInterval = setInterval(checkScanStatus, 10000); // Check every 10s normally
 
         return () => {
@@ -72,6 +80,7 @@ const Dashboard = () => {
 
     const tabs = [
         { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="h-4 w-4" /> },
+        { id: 'scanner', label: 'Scanner', icon: <ScanIcon className="h-4 w-4" /> },
         { id: 'targets', label: 'Targets', icon: <Target className="h-4 w-4" /> },
         { id: 'vulnerabilities', label: 'Vulnerabilities', icon: <Bug className="h-4 w-4" /> },
         { id: 'ai-console', label: 'AI Console', icon: <Brain className="h-4 w-4" /> },
@@ -139,14 +148,52 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Action Center */}
-                    <div className="md:row-span-2">
-                        <ActionCenter actions={latestScan?.actions || []} />
+                    {/* Action Center - Self-fetching now */}
+                    <div className="md:row-span-2 h-full">
+                        <ActionCenter />
                     </div>
 
                     {/* History */}
                     <div className="md:col-span-2">
                         <ScanHistory refresh={refreshKey} limit={5} />
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'scanner' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+                    {/* Left Column: Controls */}
+                    <div className="md:col-span-1 flex flex-col gap-6">
+                        <OpenVasScanButton onScanStarted={(data) => {
+                            setRefreshKey(prev => prev + 1);
+                            // Optionally set latest scan immediately if data contains it
+                        }} />
+                        <div className="h-[300px]">
+                            <Scheduler />
+                        </div>
+                    </div>
+
+                    {/* Right Column: Risk Visualization */}
+                    <div className="md:col-span-2 h-[450px]">
+                        {/* We need some aggregated risk data here. simpler to just pass dummy for now or aggregations from latest scan */}
+                        <RiskChart data={
+                            latestScan?.vulnerabilities?.reduce((acc, v) => {
+                                const sev = v.severity || 'LOW';
+                                acc[sev] = (acc[sev] || 0) + 1;
+                                return acc;
+                            }, {})
+                        } />
+                    </div>
+
+                    {/* Bottom Row: Results */}
+                    <div className="md:col-span-3 mt-6">
+                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <Bug className="h-5 w-5 text-cyber-neon" />
+                            Scan Results
+                            {latestScan && <span className="text-xs text-gray-500 font-mono ml-2">ID: {latestScan.configuration?.openvas_task_id || 'LOCAL'}</span>}
+                        </h3>
+                        {/* Pass the OpenVAS Task ID if available, otherwise it shows empty or error */}
+                        <VulnerabilitiesList taskId={latestScan?.configuration?.openvas_task_id} />
                     </div>
                 </div>
             )}

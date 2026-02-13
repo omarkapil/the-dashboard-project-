@@ -1,60 +1,75 @@
-import React from 'react';
-import { AlertTriangle, CheckCircle, Shield, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { dashboardService } from '../../services/api';
+import { AlertTriangle, CheckCircle, Clock, ArrowRight, Activity } from 'lucide-react';
 
-const ActionCenter = ({ actions }) => {
-    // Actions format: [{ title, description, priority, type }]
+const ActionCenter = () => {
+    const [actions, setActions] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Priority Colors
-    const getPriorityColor = (p) => {
-        switch (p) {
-            case 'CRITICAL': return 'bg-red-900/30 border-red-500 text-red-400';
-            case 'HIGH': return 'bg-orange-900/30 border-orange-500 text-orange-400';
-            case 'MEDIUM': return 'bg-yellow-900/30 border-yellow-500 text-yellow-400';
-            default: return 'bg-blue-900/30 border-blue-500 text-blue-400';
+    useEffect(() => {
+        fetchActions();
+    }, []);
+
+    const fetchActions = async () => {
+        try {
+            const { data } = await dashboardService.getActionItems();
+            setActions(data);
+        } catch (error) {
+            console.error("Failed to fetch actions", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (!actions || actions.length === 0) {
-        return (
-            <div className="bg-cyber-light p-6 rounded-xl shadow-lg border border-gray-700 h-full flex flex-col items-center justify-center text-center">
-                <Shield className="h-12 w-12 text-green-500 mb-2" />
-                <h3 className="text-xl font-bold text-white">All Clear!</h3>
-                <p className="text-gray-400 text-sm">No immediate actions required. Your system is healthy.</p>
-            </div>
-        );
-    }
+    const getPriorityColor = (p) => {
+        switch (p) {
+            case 'CRITICAL': return 'text-red-500 border-red-500/50 bg-red-500/10';
+            case 'HIGH': return 'text-orange-500 border-orange-500/50 bg-orange-500/10';
+            case 'MEDIUM': return 'text-yellow-500 border-yellow-500/50 bg-yellow-500/10';
+            default: return 'text-blue-500 border-blue-500/50 bg-blue-500/10';
+        }
+    };
+
+    if (loading) return <div className="p-4 text-center text-gray-500 animate-pulse">Loading Action Center...</div>;
 
     return (
-        <div className="bg-cyber-light p-6 rounded-xl shadow-lg border border-gray-700 h-full overflow-hidden flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-white flex items-center">
-                    <AlertTriangle className="mr-2 h-5 w-5 text-cyber-accent" />
+        <div className="glass-card h-full flex flex-col">
+            <div className="p-4 border-b border-white/5 flex justify-between items-center">
+                <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-cyber-neon" />
                     Action Center
                 </h3>
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    {actions.length} Pending
-                </span>
+                <span className="text-xs text-gray-400">{actions.length} Pending Tasks</span>
             </div>
 
-            <div className="overflow-y-auto flex-grow pr-2 space-y-3 custom-scrollbar">
-                {actions.map((action, index) => (
-                    <div key={index} className={`p-4 rounded-lg border ${getPriorityColor(action.priority)} transition hover:scale-[1.02] cursor-pointer`}>
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h4 className="font-bold text-sm mb-1">{action.title}</h4>
-                                <p className="text-xs opacity-80">{action.description}</p>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                {actions.length === 0 ? (
+                    <div className="text-center py-10 text-gray-500">
+                        <CheckCircle className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                        <p className="text-xs">All systems nominal. No pending actions.</p>
+                    </div>
+                ) : (
+                    actions.map(action => (
+                        <div key={action.id} className={`p-3 rounded-lg border flex flex-col gap-2 relative group hover:bg-white/5 transition-colors ${getPriorityColor(action.priority)}`}>
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold uppercase border px-1.5 py-0.5 rounded opacity-80">
+                                    {action.priority}
+                                </span>
+                                <span className="text-[10px] opacity-60 flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {new Date(action.created_at).toLocaleDateString()}
+                                </span>
                             </div>
-                            <span className="text-[10px] uppercase font-bold border px-1 rounded ml-2">
-                                {action.priority}
-                            </span>
-                        </div>
-                        <div className="mt-3 flex justify-end">
-                            <button className="text-xs bg-gray-800 hover:bg-gray-700 text-white py-1 px-3 rounded flex items-center transition">
-                                Fix Issue <ArrowRight className="ml-1 h-3 w-3" />
+
+                            <h4 className="font-bold text-sm text-white/90">{action.title}</h4>
+                            <p className="text-xs opacity-70 line-clamp-2">{action.description}</p>
+
+                            <button className="mt-2 text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                Remediate <ArrowRight className="h-3 w-3" />
                             </button>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );
