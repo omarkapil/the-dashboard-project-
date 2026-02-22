@@ -86,13 +86,16 @@ services:
   openvas:
     image: immauss/openvas
     container_name: sme_dashboard_openvas
+    restart: unless-stopped
     environment:
       - PUBLIC_HOSTNAME=127.0.0.1
+      - SKIPGSAD=true
     ports:
       - "9392:9392" # Web UI
       - "9390:9390" # GMP
     volumes:
       - gvm_data:/var/lib/openvas
+    entrypoint: [ "/bin/sh", "-c", "rm -f /var/lib/openvas/feed-update.lock && find /var/lib -name postmaster.pid -delete && /scripts/start.sh" ]
     networks:
       - default
       - lab_network

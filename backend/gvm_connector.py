@@ -1,7 +1,6 @@
 from gvm.connections import UnixSocketConnection, TLSConnection
 from gvm.protocols.gmp import Gmp
 from gvm.xml import pretty_print
-import ssl
 import os
 
 class GVMConnector:
@@ -17,13 +16,8 @@ class GVMConnector:
 
     def connect_and_login(self):
         """Opens a secure TLS connection and logs in."""
-        # Setup SSL/TLS context
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        context.check_hostname = False # Disable hostname check for testing
-        context.verify_mode = ssl.CERT_NONE  # Disable certificate verification for testing (should be adjusted in production)
-        
-        # Create connection
-        connection = TLSConnection(hostname=self.hostname, port=self.port, ssl_context=context)
+        # python-gvm 24.1.0 handles SSL internally; no ssl_context param
+        connection = TLSConnection(hostname=self.hostname, port=self.port)
         
         # Open connection and authenticate
         self.gmp = connection.open()

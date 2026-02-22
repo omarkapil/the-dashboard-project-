@@ -1,7 +1,6 @@
 import os
 import time
 import uuid
-import ssl
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import List, Dict, Optional, Any
@@ -27,31 +26,46 @@ class OpenVASService:
         self.connection_type = os.getenv("OPENVAS_CONNECTION_TYPE", "tls") # or "socket"
         
         self.connection = None
+        self.gmp_base = None
         self.gmp = None
 
     def _connect(self):
         """Establish connection to GVM."""
-        try:
-            if self.connection_type == "socket":
-                self.connection = UnixSocketConnection(path=self.socket_path)
-            else:
-                context = ssl.create_default_context()
-                context.check_hostname = False
-                context.verify_mode = ssl.CERT_NONE
-                self.connection = TLSConnection(hostname=self.host, port=self.port, ssl_context=context)
-            
-            self.gmp = Gmp(connection=self.connection, transform=EtreeTransform())
-            self.gmp.authenticate(self.username, self.password)
-            return True
-        except Exception as e:
-            print(f"Error connecting to OpenVAS at {self.host if self.connection_type != 'socket' else self.socket_path}: {e}")
-            # Re-raise nicely or handled
-            raise ConnectionError(f"Could not connect to OpenVAS scanner. Ensure the service is running. Details: {e}")
+        retries = 3
+        last_error = None
+        
+        for attempt in range(retries):
+            try:
+                if self.connection_type == "socket":
+                    self.connection = UnixSocketConnection(path=self.socket_path)
+                else:
+                    # python-gvm 24.1.0 handles SSL internally; no ssl_context param
+                    self.connection = TLSConnection(hostname=self.host, port=self.port)
+                
+                # In python-gvm 24.1.0, Gmp is a factory/connector.
+                # We must call connect(), then determine_supported_gmp() to get the
+                # versioned protocol object that has authenticate(), create_target(), etc.
+                self.gmp_base = Gmp(connection=self.connection, transform=EtreeTransform())
+                self.gmp_base.connect()
+                self.gmp = self.gmp_base.determine_supported_gmp()
+                self.gmp.authenticate(self.username, self.password)
+                return True
+            except Exception as e:
+                last_error = e
+                print(f"Attempt {attempt+1}/{retries} failed to connect to OpenVAS at {self.host}: {e}")
+                time.sleep(2) # Wait a bit before retrying
+
+        print(f"Error connecting to OpenVAS at {self.host if self.connection_type != 'socket' else self.socket_path}: {last_error}")
+        # Re-raise nicely or handled
+        raise ConnectionError(f"Could not connect to OpenVAS scanner after {retries} attempts. Ensure the service is running. Details: {last_error}")
 
     def _disconnect(self):
         """Close the connection."""
-        if self.connection:
-            self.connection.disconnect()
+        if self.gmp_base:
+            try:
+                self.gmp_base.disconnect()
+            except Exception:
+                pass
 
     def create_target(self, name: str, hosts: List[str], port_list_id: Optional[str] = None) -> str:
         """
