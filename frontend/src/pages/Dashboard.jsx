@@ -10,6 +10,7 @@ import ActivityFeed from '../components/dashboard/ActivityFeed';
 import TargetsManager from '../components/dashboard/TargetsManager';
 import VulnerabilitiesPanel from '../components/dashboard/VulnerabilitiesPanel';
 import AgentLogViewer from '../components/dashboard/AgentLogViewer';
+import UnifiedInbox from '../components/dashboard/UnifiedInbox';
 import Tabs from '../components/ui/Tabs';
 import { scanService, dashboardService } from '../services/api';
 
@@ -87,7 +88,8 @@ const Dashboard = () => {
         { id: 'network', label: 'Network', icon: <Network className="h-4 w-4" /> },
         { id: 'history', label: 'History', icon: <History className="h-4 w-4" /> },
         { id: 'reports', label: 'Reports', icon: <FileText className="h-4 w-4" /> },
-        { id: 'active', label: 'Live', icon: <Activity className="h-4 w-4" /> },
+        { id: 'siem', label: 'SIEM (Live)', icon: <Activity className="h-4 w-4" /> },
+        { id: 'active', label: 'Feeds', icon: <Activity className="h-4 w-4" /> },
         { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
     ];
 
@@ -239,6 +241,12 @@ const Dashboard = () => {
             {activeTab === 'reports' && (
                 <div className="animate-fade-in">
                     <Reports refresh={refreshKey} />
+                </div>
+            )}
+
+            {activeTab === 'siem' && (
+                <div className="animate-fade-in h-[600px]">
+                    <UnifiedInbox />
                 </div>
             )}
 

@@ -15,10 +15,8 @@
 - **Smart Data Recovery**: Automatically prioritizes the most feature-rich scan results for a consistent "Neural Network" view.
 
 ### 2. Autonomous AI Intelligence Agent
-- **Asset Synthesis**: Uses **Gemini Pro** to transform raw Nmap data into human-readable device roles (e.g., "Critical HR Database").
-- **Risk Path Projection**: Predicts potential lateral movement risks based on discovered service exposures.
-- **Nuclei Integration**: Powered by an automated **Nuclei** worker with intelligent template discovery (`-as`) for high-fidelity CVE detection.
 - **Validation Engine**: Performs real-time reasoning to filter false positives and provide actionable remediation tips.
+- **SIEM & SOAR Orchestration**: (New) Unified stack featuring **Wazuh** (EDR), **Elasticsearch** (Logging), and **n8n** (Automated Playbooks) for real-time threat response.
 
 ### 3. Professional Security Dashboard
 - **Asset Detail Panel**: Rich slide-out panel showing MAC Vendor, Uptime, and detailed Service Versions per asset.
@@ -36,6 +34,8 @@
 | **Frontend** | React / Vite / Tailwind CSS / Lucide Icons |
 | **Discovery** | **Nmap** (OS Detection) / **Netcat** (Simulation) |
 | **Scanning** | **Nuclei** (Vulnerabilities) / Subfinder |
+| **SIEM** | **Wazuh** / **Elasticsearch** / **Kibana** |
+| **SOAR** | **n8n** (Workflow Automation) |
 | **AI / LLM** | Google Gemini 1.5 Flash |
 
 ## 📄 Documentation & Guides

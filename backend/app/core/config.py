@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     # AI
     GEMINI_API_KEY: str = ""
     
+    # SIEM and SOAR
+    ELASTICSEARCH_URL: str = "http://localhost:9200"
+    WAZUH_API_URL: str = "https://localhost:55000"
+    WAZUH_API_USER: str = "wazuh"
+    WAZUH_API_PASSWORD: str = "wazuh"
+    N8N_WEBHOOK_URL: str = "http://localhost:5678/webhook/"
+    
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
 

@@ -20,13 +20,20 @@ This document provides a comprehensive explanation of the **found 404** platform
 **A:** Instead of a linear script, the platform uses specialized AI agents:
 - **Intelligence Agent**: Synthesizes discovery results into specialized "Device Knowledge".
 - **Risk Engine**: Calculates exposure scores based on business context and technical findings.
-- **Validation Hub**: Uses Gemini Pro to reasoning through scan data and filter out noise.
+- **Validation Hub**: Uses Gemini AI to reason through scan data and filter out noise.
+- **SIEM/SOAR Agent**: (New) Pulls live logs from Wazuh/Elastic, triages threats with AI, and triggers automated playbooks.
 
 ### Q: How does it handle asset discovery?
 **A:** It integrates deeply with **Nmap** for network scanning, OS detection, and service fingerprinting. It then visualizes this data in an interactive **Network Topology Graph**, making it easy to see the "attack surface."
 
 ### Q: What is the vulnerability engine?
 **A:** It leverages **Nuclei**, a powerful template-based scanner, to look for thousands of known vulnerabilities, misconfigurations, and CVEs across web services, protocols, and network layers.
+
+### Q: How does the new SIEM/SOAR integration work?
+**A:** The platform now features a unified security stack:
+- **Wazuh**: Monitors endpoints for real-time intrusions.
+- **Elasticsearch**: Aggregates all security logs into a searchable index.
+- **n8n**: Acts as the SOAR engine to execute remediation "playbooks" (e.g., blocking an IP) when the AI Agent identifies a critical threat.
 
 ---
 

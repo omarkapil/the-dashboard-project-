@@ -13,6 +13,9 @@ import google.generativeai as genai
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.models.scan import AgentLog, Scan, Vulnerability, Endpoint, SeverityLevel, VulnStatus
+from app.services.wazuh_integration import wazuh_service
+from app.services.elastic_integration import elastic_service
+from app.services.soar_orchestrator import soar_service
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +45,9 @@ class BaseAgent(ABC):
         if settings.GEMINI_API_KEY:
             genai.configure(api_key=settings.GEMINI_API_KEY)
             try:
-                self.llm = genai.GenerativeModel('gemini-1.5-flash')
-            except Exception:
                 self.llm = genai.GenerativeModel('gemini-1.5-flash-latest')
+            except Exception:
+                self.llm = genai.GenerativeModel('gemini-pro')
     
     def log_action(self, action: str, reasoning: Dict = None, 
                    input_data: Dict = None, output_data: Dict = None):
@@ -654,6 +657,77 @@ REASONING: [your brief explanation]"""
 
 
 # ============================================================================
+# SIEM & SOAR AGENT (NEW)
+# ============================================================================
+
+class SIEMAgent(BaseAgent):
+    """
+    Pulls data from Wazuh/Elasticsearch, analyzes with Gemini, and triggers SOAR playbooks.
+    """
+    def __init__(self, scan_id: str, db_session=None):
+        super().__init__("siem_agent", scan_id, db_session)
+
+    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        self.state = AgentState.RUNNING
+        
+        self.log_action(action="start_siem_analysis", reasoning={"goal": "Analyze SIEM logs and trigger SOAR actions"})
+        
+        # 1. Fetch data
+        elastic_alerts = await elastic_service.fetch_recent_alerts()
+        wazuh_agents = await wazuh_service.get_agents()
+        
+        findings = []
+        actions_taken = []
+        
+        # 2. Analyze with LLM
+        if elastic_alerts:
+            # For demo, take first 5 alerts
+            for alert in elastic_alerts[:5]:
+                prompt = f"""You are a SOC Analyst AI. Analyze this SIEM alert:
+{json.dumps(alert)}
+Is this a real threat? Reply exactly with format:
+VERDICT: [THREAT/BENIGN]
+CONFIDENCE: [0.0-1.0]
+ACTION: [BLOCK_IP/ISOLATE_HOST/NONE]
+TARGET: [IP or Agent ID]
+REASON: [Brief explanation]
+"""
+                response = self.llm_reason(prompt)
+                
+                if "THREAT" in response:
+                    # Parse action
+                    action_line = [line for line in response.split('\\n') if "ACTION:" in line]
+                    target_line = [line for line in response.split('\\n') if "TARGET:" in line]
+                    
+                    if action_line and target_line:
+                        action = action_line[0].split("ACTION:")[1].strip()
+                        target = target_line[0].split("TARGET:")[1].strip()
+                        
+                        if action != "NONE":
+                            # 3. Trigger SOAR
+                            success = await soar_service.trigger_playbook(
+                                playbook_id=action.lower().replace("_", "-"),
+                                action=action,
+                                data={"target": target, "alert": alert}
+                            )
+                            actions_taken.append({
+                                "action": action,
+                                "target": target,
+                                "success": success
+                            })
+                            findings.append({"alert": alert, "analysis": response})
+        
+        self.state = AgentState.COMPLETED
+        result = {
+            "alerts_analyzed": len(elastic_alerts),
+            "threats_found": len(findings),
+            "soar_actions": actions_taken
+        }
+        self.log_action(action="siem_analysis_complete", output_data=result)
+        return result
+
+
+# ============================================================================
 # REPORTING AGENT
 # ============================================================================
 
@@ -972,4 +1046,28 @@ class AgentOrchestrator:
         finally:
             self.db.close()
         
+        return results
+
+    async def run_siem_pipeline(self) -> Dict:
+        """
+        Execute just the SIEM analysis workflow (pull logs, analyze, trigger SOAR).
+        """
+        results = {
+            "scan_id": self.scan_id,
+            "stages": {}
+        }
+        
+        try:
+            # Run SIEM Agent
+            siem_agent = SIEMAgent(self.scan_id, self.db)
+            siem_result = await siem_agent.execute({})
+            results["stages"]["siem"] = siem_result
+            results["status"] = "completed"
+        except Exception as e:
+            logger.error(f"SIEM pipeline failed: {e}")
+            results["status"] = "failed"
+            results["error"] = str(e)
+        finally:
+            self.db.close()
+            
         return results

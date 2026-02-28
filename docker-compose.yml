@@ -6,11 +6,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      - ./backend:/app
       # - gvm_socket:/run/gvmd
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/sme_cyber_db
-      - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=postgresql://user:password@db:5432/sme_cyber_db
       - REDIS_URL=redis://redis:6379/0
       - GEMINI_API_KEY=${GEMINI_API_KEY}
@@ -18,6 +15,11 @@ services:
       - OPENVAS_PORT=9390
       - OPENVAS_CONNECTION_TYPE=tls # immauss/openvas uses TLS on 9390
       # - OPENVAS_SOCKET=/run/gvmd/gvmd.sock
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - WAZUH_API_URL=https://wazuh:55000
+      - WAZUH_API_USER=wazuh
+      - WAZUH_API_PASSWORD=wazuh
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/
     networks:
       - default
       - lab_network
@@ -64,6 +66,11 @@ services:
       - DATABASE_URL=postgresql://user:password@db:5432/sme_cyber_db
       - REDIS_URL=redis://redis:6379/0
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - WAZUH_API_URL=https://wazuh:55000
+      - WAZUH_API_USER=wazuh
+      - WAZUH_API_PASSWORD=wazuh
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/
     networks:
       - default
       - lab_network
@@ -79,6 +86,11 @@ services:
       - DATABASE_URL=postgresql://user:password@db:5432/sme_cyber_db
       - REDIS_URL=redis://redis:6379/0
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - WAZUH_API_URL=https://wazuh:55000
+      - WAZUH_API_USER=wazuh
+      - WAZUH_API_PASSWORD=wazuh
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/
     depends_on:
       - backend
       - redis
@@ -100,6 +112,65 @@ services:
       - default
       - lab_network
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    container_name: sme_dashboard_elastic
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    networks:
+      - default
+      - lab_network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.1
+    container_name: sme_dashboard_kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - default
+      - lab_network
+
+  wazuh:
+    image: wazuh/wazuh-manager:4.7.2
+    container_name: sme_dashboard_wazuh
+    ports:
+      - "1514:1514"
+      - "1515:1515"
+      - "55000:55000"
+    environment:
+      - WAZUH_API_START="true"
+    networks:
+      - default
+      - lab_network
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: sme_dashboard_n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=UTC
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - default
+      - lab_network
+
 networks:
   default:
   lab_network:
@@ -109,5 +180,7 @@ networks:
 volumes:
   postgres_data:
   gvm_data:
+  elastic_data:
+  n8n_data:
 
 
